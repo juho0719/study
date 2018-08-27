@@ -1,0 +1,32 @@
+# 스프링 웹 MVC 5부 웹JAR
+
+
+
+클라이언트(프론트엔드)에서 사용하는 jquery, vue.js, react.js, angular 등
+
+이러한 프론트엔드 라이브러리도 의존성 추가로 사용할 수 있음
+
+예) JQuery 라이브러리 의존성 추가
+
+```properties
+<dependency>
+    <groupId>org.webjars.bower</groupId>
+    <artifactId>jquery</artifactId>
+    <version>3.3.1</version>
+</dependency>
+```
+
+
+
+버전 지정 안하려면 새로운 의존성 추가해야 함
+
+```properties
+<dependency>
+    <groupId>org.webjars</groupId>
+    <artifactId>webjars-locator-core</artifactId>
+    <version>0.35</version>
+</dependency>
+```
+
+
+
