@@ -131,3 +131,57 @@ text.fontSize = 20;
 text.content = 'hello world';
 ```
 - 텍스트 배경으로 쓸 원을 만들고, 텍스트 객체가 캔버스 중앙에 위치하고, 텍스트로 `hello world`를 지정
+
+## 최종 작성 소스 정리
+index.html
+```html
+<html>
+    <head>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <h1>My first application</h1>
+        <p>Welcome to <i>Learning Javascript, 3rd Edition</i>.</p>
+        <canvas id="mainCanvas"></canvas>
+
+        <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.9.25/paper-full.min.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
+```
+
+main.js
+```javascript
+$(document).ready(function() {
+    'use strict';
+    paper.install(window);
+    paper.setup(document.getElementById('mainCanvas'));
+    
+    var c = Shape.Circle(200, 200, 80);
+    c.fillColor = 'black';
+    var text = new PointText(200, 200);
+    text.justification = 'center';
+    text.fillColor = 'white';
+    text.fontSize = 20;
+    text.content = 'hello world';
+    
+    var tool = new Tool();
+    tool.onMouseDown = function(event) {
+        var c = Shape.Circle(event.point.x, event.point.y, 20);
+        c.fillColor = 'green';    
+    };
+
+    paper.view.draw();
+    console.log('main.js loaded');
+});
+```
+
+main.css
+```css
+#mainCanvas {
+    width: 400px;
+    height: 400px;
+    border: solid 1px black;
+}
+```
