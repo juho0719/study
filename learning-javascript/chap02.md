@@ -216,3 +216,22 @@ gulp.task('default', function() {
         .pipe(gulp.dest("public/dist"));
 });
 ```
+- `.eslintrc` 파일 수정으로 설정 변경 가능
+- 각 규칙의 첫번째 숫자는 에러표시 구분 (0: 규칙을 적용하지 않음, 1: 실수, 2: 에러)
+```
+{
+    "rules": {
+        /*  마지막 쉽표 사용 가능으로 규칙 수정
+            하지만 이 파일은 JSON이므로, 마지막 쉽표를 쓸 수 없음 */
+        "comma-dangle": [
+            2,
+            "always-multiline"
+        ],
+        "indent": [
+            2,
+            4
+        ],
+        /* ... */
+    }
+}
+```
