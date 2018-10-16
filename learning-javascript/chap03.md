@@ -79,4 +79,129 @@ str = "world";      // str의 값을 wolrd로 변경
     - Set과 WeakSet
 
 ## 숫자
+- 자바 스크립트는 10진수, 2진수, 8진수, 16진수의 네가지 숫자형 리터럴을 인식
+- 소수점없는 정수, 소수점 있는 10진수, 지수 표기, 무한대, 음의 무한대, '숫자가 아님' 등등
+```javascript
+let count = 10;             // 숫자 리터럴. count는 더블이다.
+const blue = 0x0000ff;      // 16진수. 16진수 ff는 10진수 255와 같다.
+const unmask = 0o0022;      // 8진수. 8진수 22는 십진수 18과 같다
+const roomTemp = 21.5;      // 10진수
+const c = 3.0e6;            // 지수 (3.8 * 10^6 = 3,000,000)
+const e = -1.6e-19;         // 지수 (-1.6 * 10^-19) = 0.00000000000000000016)
+const inf = Infinity;
+const ninff = -Infinity;
+const nan = NaN;            // '숫자가 아님'
+```
+- 10진수, 16진수, 지수등 어떤 리터럴 형식을 사용하더라도 결국 숫자는 더블 형식으로 저장
+- 숫자를 대응하는 Number 객체에는 숫자형 값에 해당하는 프로퍼티가 있음
+```javascript
+const small = Number.EPSILON;           // 1에 더했을 때 1과 구분되는 결과를 만들 수 있는 
+                                        // 가장 작은 값. 근사치는 2.2e-16이다.
+const bigInt = Number.MAX_SAFE_INTEGER; // 표현할 수 있는 가장 큰 정수
+const max = Number.MAX_VALUE;           // 표현할 수 있는 가장 큰 숫자
+const minInt = Number.MIN_SAFE_INTEGER; // 표현할 수 있는 가장 작은 정수
+const min = Number.MIN_VALUE;           // 표현할 수 있는 가장 작은 숫자
+const nInf = Number.NEGATIVE_INFINITY;  // -Infinity
+const nan = Number.NaN;                 // NaN
+const inf = Number.POSITIVE_INFINITY;   // Infinity
+```
+
+## 문자열
+- 자바스크립트 문자열은 유니코드 텍스트
+- 자바스크립트의 문자열 리터럴에는 작은따옴표, 큰따옴표, 백틱을 사용 (백틱은 ES6에서 도입)
+
+#### 이스케이프
+- 문자열중 작은따옴표가 있으면 문자열 리터럴로 큰따옴표를 사용하고, 반대의 경우는 반대로 사용하면 됨
+```javascript
+const dialog = 'Sam looked up, and said "hello, old friend!", as Max walked in.';
+const imperative = "Don't do that!";
+```
+- 단, 둘다 문자열로 사용하는 경우에는 이스케이프(\)를 사용하면 해당 문자열을 사용할 수 있음
+```javascript
+const dialog1 = "He looked up and said \"don't do that!\" to Max.";
+const dialog2 = 'He looked up and said "don\'t do that!" to Max.';
+```
+- 문자열에서 역슬래시(\)를 써야할 때는? (\\로 사용)
+```javascript
+const s = "In JavaScript, use \\ as an escape character in strings.";
+```
+
+## 특수문자
+- 역슬래시(\)는 줄바꿈 문자와 같이 화면에 표시되지 않는 일부 특수문자나 임의의 유니코드 문자를 나타낼때도 사용
+
+| 코드  | 설명 | 예제 |
+|------|-----|-----|
+| \n   | 라인 피드(ASCII/Unicode 10) 유닉스계열 줄바꿈 문자 | "Line1\nLine2" |
+| \r   | 캐리지 리턴(ASCII/Unicode 13) 윈도우 줄바꿈 문자 | "Windows line 1\r\n Windows line2" |
+| \t   | 탭(ASCII/Unicode 9) | "Speed:\t60kph" |
+| \'   | 작은 따옴표 | "Don\'t" |
+| \"   | 큰 따옴표 | 'Sam said \"hello\".' |
+| \\\` | 백틱 (ES6) | \`New in ES6 : \\\` strings.\` |
+| \$   | 달러 기호 (ES6) | \`New in ES6: ${interpolation}\` |
+| \\\\ | 역슬래시 | "Use \\\\\\\\ to represent \\\\!" |
+| \uXXXX | 임의의 유니코드 코드 포인트. 여기서 XXXX는 16진수 코드 포인트 | "De Morgan's law: \u2310(P \u22c0Q) \u21D4 (\u2310P) \u22c1 (\u2310Q)" |
+| \xXX | 라틴-1 문자. 여기서 XX는 16진수 라틴-1 코드 포인트 | "\xc9p\xe9e is fun, but foil is more fun." |
+
+- 라틴-1 문자셋은 유니코드의 부분집합. `\xXX`는 `\u00XX`와 같음
+- \x, \u 모두 대소문자 가리지 않음 (\X, \U 써도 동일)
+- 자주 쓰지 않는 특수문자
+  
+| 코드  | 설명 | 예제 |
+|------|-----|-----|
+| \0   | NUL 문자(ASCII/Unicode 0) | "ASCII NUL: \0" |
+| \v   | 세로 탭(ASCII/Unicode 11) | "vertical tab: \v" |
+| \b   | 백스페이스(ASCII/Unicode 8) | "Backspace: \b" |
+| \f   | 폼 피드(ASCII/Unicode 12)  | "Form feed: \f" |
+
+#### 템플릿 문자열
+
+- 값을 문자열 안에 써야 할 경우 문자열 병합을 통해 변수나 상수를 문자열 안에 쓸 수 있음
+```javascript
+let currentTemp = 19.5;
+// 00b0은 온도를 나타내는 유니코드 코드 포인트
+const message = "The current temperature is " + currentTemp + "\u00b0C";
+```
+- ES6에서는 문자열 템플릿 기능을 도입, 정해진 위치에 값을 채워 넣어줌
+```javascript
+let currentTemp = 19.5;
+const message = `The current temperature is ${currentTemp}\u00b0C`;
+```
+
+#### 여러 줄 문자열
+- 여러줄 문자열에 줄바꿈 문자 삽입
+```javascript
+const multiline = "line1\n\
+line2";
+```
+- 백틱을 사용하면 좀 더 보기 편함
+```javascript
+const multiline = `line1
+line2`;
+```
+- 코드의 열을 맞추려 여러 줄 문자열을 사용한다면 원치 않는 문자까지 같이 들어옴 (탭 문자열)
+```javascript
+const multiline = `line1
+    line2
+    line3`;
+```
+- 문자열 병합을 통한 여러줄 문자열 사용 권장
+```javascript
+const multiline = "line1\n" +
+    "line2\n" +
+    "line3";
+```
+- 문자열 템플릿, 문자열 리터럴을 섞어 써도 무방
+```javascript
+const multiline = 'Current Temperature:\n' +
+    `\t${currentTemp}\u00b0C\n` +
+    "Don't worry... the heat is on!";
+```
+
+#### 숫자와 문자열
+- 따옴표안의 숫자는 문자열이지만 경우에 따라 숫자로 바뀌는 경우가 있음
+```javascript
+const result1 = 3 + '30';   // 3이 문자열로 바뀜. 330
+const result2 = 3 * '30';   // 30이 숫자로 바뀜. 90
+```
+- 숫자 표현시 따옴표를 사용하지 않는 것을 권장
 
