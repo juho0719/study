@@ -1,4 +1,4 @@
-# 리터럴과 변수, 상수, 데이터 타입
+k# 리터럴과 변수, 상수, 데이터 타입
 
 ## 변수와 상수
 - 언제든 바뀔 수 있는 값 (let은 ES6에서 생김, 그전에는 var키워드만 가능)
@@ -205,3 +205,110 @@ const result2 = 3 * '30';   // 30이 숫자로 바뀜. 90
 ```
 - 숫자 표현시 따옴표를 사용하지 않는 것을 권장
 
+## 불리언
+- true와 false로 이루어져 있음
+- 값에 따옴표를 넣지 않도록 주의 ("true", "false" 아님)
+```javascript
+let heating = true;
+let cooling = false;
+```
+
+## 심볼
+- 유일한 토큰을 나타냄 (ES6)
+- 다른 어떤 심볼과 일치하지 않음
+- 항상 유일하다는 점을 제외하면 원시 값의 특징을 모두 가지고 있음
+- 심볼은 Symbol() 생성자로 만듦
+```javascript
+const RED = Symbol("The color of a sunset!");
+const ORANGE = Symbol("The color of a sunset!");
+RED === ORANGE  // false : 심볼은 모두 서로 다름
+```
+- 고유한 식별자가 필요하다면 심볼을 사용
+
+## null과 undefined
+- 자바스크립트의 특별한 타입
+- null과 undefined 모두 존재 하지 않는 것을 나타냄
+```javascript
+let currentTemp;            // 암시적으로 undefined임
+const targetTemp = null;    // 대상 온도는 null, 즉 "아직 모르는" 값
+currentTemp = 19.5;         // 19.5로 값을 넣음
+currentTemp = undefined;    // currentTemp는 초기화되지 않은 값. 권장하지 않음
+```
+
+## 객체
+- 객체의 본질은 컨테이너
+- 컨테이너의 내용물은 시간이 지나면서 바뀔 수 있지만, 내용물이 바뀐다고 컨테이너가 바뀌는 것은 아님
+```javascript
+const obj = {};
+```
+- 객체의 컨텐츠는 프로퍼티 or 멤버라 불림
+- 프로퍼티는 Key-Value형태로 구성
+- 프로퍼티 이름은 반드시 문자열 또는 심볼이어야 하며, 값은 어떤 타입이든 상관없고 객체도 가능
+```javascript
+obj.color = "yellow";
+```
+- 프로퍼티 이름에 유효한 식별자를 써야 멤버 `접근 연산자(.)`을 사용할 수 있음
+- 프로퍼티 이름에 유효한 식별자가 아닌 이름을 쓴다면 `계산된 멤버 접근 연산자([])`를 써야 함
+- 프로퍼티 이름이 유효한 식별자여도 `[]`로 접근할 수 있음
+```javascript
+obj["not an identifier"] = 3;
+obj["not an identifier"];       // 3
+obj["color"];                   // yellow
+```
+- 심볼 프로퍼티 접근할 때도 `[]` 사용
+```javascript
+const SIZE = Symbol();
+obj[SIZE] = 8;
+obj[SIZE];      // 8
+```
+- 콘솔에서 보면 `SIZE`를 obj의 프로퍼티로 나열하지 않고 있는데 실제로 `obj[SIZE]`를 확인해 보면 obj의 프로퍼티로 나옴. 이처럼 심볼은 기본적으로 표시되지 않고 다르게 처리됨
+- 객체 리터럴 문법에서는 객체를 만드는 동시에 프로퍼티를 만들 수 있음
+```javascript
+const sam1 = {
+    name: 'Sam',
+    age: 4,
+};
+
+const sam2 = { name: 'Sam', age: 4 };   // 한 줄로 선언
+
+const sam3 = {
+    name: 'Sam',
+    classification: {                   // 프로퍼티 값도 객체가 될 수 있음
+        kingdom: 'Anamalia',
+        phylum: 'Chordata',
+        class: 'Mamalia'
+        order: 'Carnivoria',
+        family: 'Felidae',
+        subfamily: 'Felinae',
+        genus: 'Felis',
+        species: 'catus',
+    },
+};
+```
+- 위 예제에서 sam1과 sam2는 다른 객체 (프로퍼티만 같음)
+- sam3가 family에 접근하는 방법
+```javascript
+sam3.classification.family;         // "Felidae"
+sam3["classification"].family;      // "Felidae"
+sam3.classification["family"];      // "Felidae"
+sam3["classification"]["family"];   // "Felidae"
+```
+- 객체에 함수를 담을 수도 있음
+```javascript
+sam3.speak = function() { return "Meow!"; };
+```
+- 프로퍼티를 제거할 때는 `delete`연산자 사용
+```javascript
+delete sam3.classification;     // classification 트리 전체가 삭제
+delete sam3.speak;              // speak 함수가 삭제
+```
+
+## Number, String, Boolean 객체
+- 숫자, 문자열, 불리언에는 각각 대응하는 객체 타입 Number, String, Boolean으로 구성
+- 두가지 목적이 있음
+- Number.INFINITY같은 특별한 값을 저장
+- 함수 형태로 기능 제공
+```javascript
+const s = "hello";
+s.toUpperCase();    // "HELLO"
+```
