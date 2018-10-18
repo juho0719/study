@@ -313,3 +313,160 @@ const s = "hello";
 s.toUpperCase();    // "HELLO"
 ```
 
+## 배열
+- 배열은 항상 순서가 있고, 키는 순차적인 숫자
+- 배열 크기는 고정되어 있지 않음. 언제든 요소 추가 및 삭제 가능
+- 요소의 데이터타입을 가리지 않음
+- 배열 요소는 0으로 시작
+- 배열 리터럴은 대괄호안에 배열 요소를 쉼표로 구분하여 씀
+```javascript
+const a1 = [1, 2, 3, 4];
+const a2 = [1, 'two', 3, null];
+const a3 = [
+    "What the hammer? Waht the chain?",
+    "In what furnace was thy brain?",
+    "What the anvil? What dread grasp",
+    "Dare its deadly terrors clasp?",
+];
+const a4 = [
+    { name: "Ruby", hardness: 9 },
+    { name: "Diamond", hardness: 10 },
+    { name: "Topaz", hardness: 8 },
+];
+const a5 = [
+    [1, 3, 5],
+    [2, 4, 6],
+];
+```
+- 배열에는 요소 숫자를 반환하는 length 프로퍼티가 있음
+```javascript
+const arr = ['a', 'b', 'c'];
+arr.length;     // 3
+```
+- 배열 요소에 접근할 때는 대괄호 안에 요소의 인덱스 숫자를 사용
+```javascript
+const arr = ['a', 'b', 'c'];
+
+// 첫번째 요소를 가져옴
+arr[0];                 // 'a'
+// arr의 마지막 요소의 인덱스는 arr.length-1
+arr[arr.length - 1];    // 'c'
+```
+- 배열 요소의 값을 덮어쓸 때는 새 값을 할당하면 됨
+```javascript
+const arr = [1, 2, 'c', 4, 5];
+arr[2] = 3;     // arr은 이제 [1, 2, 3, 4, 5] 임
+```
+
+## 객체와 배열 마지막의 쉼표
+- 여러 행에 나눠 썼을 때 마지막에 쉽표가 붙어있음
+- 이런 마지막 쉼표를 trailing comma, dangling comma, terminal comma 등으로 부름
+```javascript
+const arr = [
+    "One",
+    "Two",
+    "Three",
+];
+const o = {
+    one: 1,
+    two: 2,
+    three: 3,
+};
+```
+- 자바스크립트는 마지막 쉼표를 허용함 (단, json은 허용하지 않음)
+
+## 날짜
+- 자바스크립트에서 날짜와 시간은 내장된 Date 객체에서 담당
+- 현재 날짜와 시간을 나타내는 객체를 만들 때 `new Date()` 사용
+- 특정 날짜에 해당하는 객체를 만들 때
+```javascript
+const halloween = new Date(2018, 9, 31);    // 월은 0에서 시작하기 때문에 9를 씀
+```
+- 특정 날짜와 시간에 해당하는 객체를 만들 때
+```javascript
+const halloweenParty = new Date(2018, 9, 31, 19, 0);    // 19:00
+```
+- 날짜 객체는 다음과 같은 값들을 가져올 수 있음
+```javascript
+halloweenParty.getFullYear();       // 2018
+halloweenParty.getMonth();          // 9
+halloweenParty.getDate();           // 31
+halloweenParty.getDay();            // 3 (수요일, 0이 일요일)
+halloweenParty.getHours();          // 19
+halloweenParty.getMinutes();        // 0
+halloweenParty.getSeconds();        // 0
+halloweenParty.getMilliseconds();   // 0
+```
+
+## 정규 표현식
+- regex, regexp라 씀
+- 문자열에 필요한 복잡한 검색과 교체 작업을 비교적 단순하게 만듦
+- 자바스크립트의 정규표현식은 RegExp 객체를 사용
+- 슬래시 한 쌍(/.../) 사이에 심볼을 넣는 리터럴 문법도 있음
+```javascript
+// 간단한 이메일 정규표현식
+const email = /\b[a-z0-9._-]+@[a-z_-]+(?:\.[a-z]+)+\b/;
+
+// 미국 전화번호 정규표현식
+const phone = /(:?\+1)?(:?\(\d{3}\}\s?|\d{3}[\s-]?)\d{3}[\s-]?\d{4}/;
+```
+
+# 맵과 셋
+- ES6에서는 Map과 Set, WeakMap과 WeakSet을 도입
+
+## 데이터 타입 변환
+
+#### 숫자로 바꾸기
+- Number 객체 생성자 사용
+```javascript
+const numStr = "33.3";
+const num = Number(numStr);     // 숫자로 변환, Number객체의 인스턴스가 아님
+```
+- 숫자로 바꿀 수 없는 문자열엔 NaN이 반환
+- parseInt나 parseFloat함수를 사용
+- parseInt를 사용할 때 기수값을 넘겨 몇 진수인지 지정가능
+- parseInt와 parseFloat 모두 숫자로 판단할 수 있는 부분까지만 변환, 그 뒤는 무시
+```javascript
+const a = parseInt("16 volts", 10);     // 16, volts는 무시
+const b = parseInt("3a", 16);           // 16진수 3a를 10진수로 변환 -> 58
+const c = parseFloat("15.5 kph");       // kph는 무시, parseFloat은 기수가 항상 10이라 가정
+```
+- Date 객체를 숫자로 변환할 때는 valueOf() 메소드를 사용
+```javascript
+const d = new Date();
+const ts = d.valueOf();     // 1970년 1월 1일 자정으로 부터 몇 밀리초가 지났는지 나타냄
+```
+- 불리언 값 변환은 조건 연산자를 사용
+```javascript
+const b = true;
+const n = b ? 1 : 0;
+```
+
+#### 문자열로 변환
+- toString()
+- 문자열 병합에서 자동으로 숫자를 문자열로 변환하므로 직접 바꿀 일은 많지 않음
+```javascript
+const n = 33.5;         // 숫자
+const s = n.toString()  // 문자열
+```
+- 객체의 문자열로 `[object Object]`와 같이 쓸모 없는 문자열로 반환
+- 배열의 문자열은 상대적으로 보기 좋게 나옴
+```javascript
+const arr = [1, true, "hello"];
+arr.toString();     // "1,true,hello"
+```
+
+#### 불리언으로 변환
+- 부정(!) 연산자를 써서 모든 값을 불리언으로 바꿀 수 있음
+- 부정 연산자를 한번 사용하면 false, 한번 더 쓰면 true
+```javascript
+const n = 0;            // 거짓을 나타내는 값
+const b1 = !!n;         // false
+const b2 = Boolean(n);  // false
+```
+
+## 요약
+- 자바스크립트에는 문자열, 숫자, 불리언, null, undefined, 심볼의 여섯가지 원시 타입과 객체 타입이 있음
+- 자바스크립트의 모든 숫자는 배정도 부동소수점 숫자(double)임
+- 날짜, 맵, 셋, 정규표현식 등은 자주 사용할 특수한 객체 타입
+
