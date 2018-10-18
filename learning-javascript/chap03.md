@@ -312,3 +312,4 @@ delete sam3.speak;              // speak 함수가 삭제
 const s = "hello";
 s.toUpperCase();    // "HELLO"
 ```
+
