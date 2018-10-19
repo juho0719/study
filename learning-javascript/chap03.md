@@ -1,4 +1,4 @@
-# 리터럴과 변수, 상수, 데이터 타입
+k# 리터럴과 변수, 상수, 데이터 타입
 
 ## 변수와 상수
 - 언제든 바뀔 수 있는 값 (let은 ES6에서 생김, 그전에는 var키워드만 가능)
@@ -204,4 +204,269 @@ const result1 = 3 + '30';   // 3이 문자열로 바뀜. 330
 const result2 = 3 * '30';   // 30이 숫자로 바뀜. 90
 ```
 - 숫자 표현시 따옴표를 사용하지 않는 것을 권장
+
+## 불리언
+- true와 false로 이루어져 있음
+- 값에 따옴표를 넣지 않도록 주의 ("true", "false" 아님)
+```javascript
+let heating = true;
+let cooling = false;
+```
+
+## 심볼
+- 유일한 토큰을 나타냄 (ES6)
+- 다른 어떤 심볼과 일치하지 않음
+- 항상 유일하다는 점을 제외하면 원시 값의 특징을 모두 가지고 있음
+- 심볼은 Symbol() 생성자로 만듦
+```javascript
+const RED = Symbol("The color of a sunset!");
+const ORANGE = Symbol("The color of a sunset!");
+RED === ORANGE  // false : 심볼은 모두 서로 다름
+```
+- 고유한 식별자가 필요하다면 심볼을 사용
+
+## null과 undefined
+- 자바스크립트의 특별한 타입
+- null과 undefined 모두 존재 하지 않는 것을 나타냄
+```javascript
+let currentTemp;            // 암시적으로 undefined임
+const targetTemp = null;    // 대상 온도는 null, 즉 "아직 모르는" 값
+currentTemp = 19.5;         // 19.5로 값을 넣음
+currentTemp = undefined;    // currentTemp는 초기화되지 않은 값. 권장하지 않음
+```
+
+## 객체
+- 객체의 본질은 컨테이너
+- 컨테이너의 내용물은 시간이 지나면서 바뀔 수 있지만, 내용물이 바뀐다고 컨테이너가 바뀌는 것은 아님
+```javascript
+const obj = {};
+```
+- 객체의 컨텐츠는 프로퍼티 or 멤버라 불림
+- 프로퍼티는 Key-Value형태로 구성
+- 프로퍼티 이름은 반드시 문자열 또는 심볼이어야 하며, 값은 어떤 타입이든 상관없고 객체도 가능
+```javascript
+obj.color = "yellow";
+```
+- 프로퍼티 이름에 유효한 식별자를 써야 멤버 `접근 연산자(.)`을 사용할 수 있음
+- 프로퍼티 이름에 유효한 식별자가 아닌 이름을 쓴다면 `계산된 멤버 접근 연산자([])`를 써야 함
+- 프로퍼티 이름이 유효한 식별자여도 `[]`로 접근할 수 있음
+```javascript
+obj["not an identifier"] = 3;
+obj["not an identifier"];       // 3
+obj["color"];                   // yellow
+```
+- 심볼 프로퍼티 접근할 때도 `[]` 사용
+```javascript
+const SIZE = Symbol();
+obj[SIZE] = 8;
+obj[SIZE];      // 8
+```
+- 콘솔에서 보면 `SIZE`를 obj의 프로퍼티로 나열하지 않고 있는데 실제로 `obj[SIZE]`를 확인해 보면 obj의 프로퍼티로 나옴. 이처럼 심볼은 기본적으로 표시되지 않고 다르게 처리됨
+- 객체 리터럴 문법에서는 객체를 만드는 동시에 프로퍼티를 만들 수 있음
+```javascript
+const sam1 = {
+    name: 'Sam',
+    age: 4,
+};
+
+const sam2 = { name: 'Sam', age: 4 };   // 한 줄로 선언
+
+const sam3 = {
+    name: 'Sam',
+    classification: {                   // 프로퍼티 값도 객체가 될 수 있음
+        kingdom: 'Anamalia',
+        phylum: 'Chordata',
+        class: 'Mamalia'
+        order: 'Carnivoria',
+        family: 'Felidae',
+        subfamily: 'Felinae',
+        genus: 'Felis',
+        species: 'catus',
+    },
+};
+```
+- 위 예제에서 sam1과 sam2는 다른 객체 (프로퍼티만 같음)
+- sam3가 family에 접근하는 방법
+```javascript
+sam3.classification.family;         // "Felidae"
+sam3["classification"].family;      // "Felidae"
+sam3.classification["family"];      // "Felidae"
+sam3["classification"]["family"];   // "Felidae"
+```
+- 객체에 함수를 담을 수도 있음
+```javascript
+sam3.speak = function() { return "Meow!"; };
+```
+- 프로퍼티를 제거할 때는 `delete`연산자 사용
+```javascript
+delete sam3.classification;     // classification 트리 전체가 삭제
+delete sam3.speak;              // speak 함수가 삭제
+```
+
+## Number, String, Boolean 객체
+- 숫자, 문자열, 불리언에는 각각 대응하는 객체 타입 Number, String, Boolean으로 구성
+- 두가지 목적이 있음
+- Number.INFINITY같은 특별한 값을 저장
+- 함수 형태로 기능 제공
+```javascript
+const s = "hello";
+s.toUpperCase();    // "HELLO"
+```
+
+## 배열
+- 배열은 항상 순서가 있고, 키는 순차적인 숫자
+- 배열 크기는 고정되어 있지 않음. 언제든 요소 추가 및 삭제 가능
+- 요소의 데이터타입을 가리지 않음
+- 배열 요소는 0으로 시작
+- 배열 리터럴은 대괄호안에 배열 요소를 쉼표로 구분하여 씀
+```javascript
+const a1 = [1, 2, 3, 4];
+const a2 = [1, 'two', 3, null];
+const a3 = [
+    "What the hammer? Waht the chain?",
+    "In what furnace was thy brain?",
+    "What the anvil? What dread grasp",
+    "Dare its deadly terrors clasp?",
+];
+const a4 = [
+    { name: "Ruby", hardness: 9 },
+    { name: "Diamond", hardness: 10 },
+    { name: "Topaz", hardness: 8 },
+];
+const a5 = [
+    [1, 3, 5],
+    [2, 4, 6],
+];
+```
+- 배열에는 요소 숫자를 반환하는 length 프로퍼티가 있음
+```javascript
+const arr = ['a', 'b', 'c'];
+arr.length;     // 3
+```
+- 배열 요소에 접근할 때는 대괄호 안에 요소의 인덱스 숫자를 사용
+```javascript
+const arr = ['a', 'b', 'c'];
+
+// 첫번째 요소를 가져옴
+arr[0];                 // 'a'
+// arr의 마지막 요소의 인덱스는 arr.length-1
+arr[arr.length - 1];    // 'c'
+```
+- 배열 요소의 값을 덮어쓸 때는 새 값을 할당하면 됨
+```javascript
+const arr = [1, 2, 'c', 4, 5];
+arr[2] = 3;     // arr은 이제 [1, 2, 3, 4, 5] 임
+```
+
+## 객체와 배열 마지막의 쉼표
+- 여러 행에 나눠 썼을 때 마지막에 쉽표가 붙어있음
+- 이런 마지막 쉼표를 trailing comma, dangling comma, terminal comma 등으로 부름
+```javascript
+const arr = [
+    "One",
+    "Two",
+    "Three",
+];
+const o = {
+    one: 1,
+    two: 2,
+    three: 3,
+};
+```
+- 자바스크립트는 마지막 쉼표를 허용함 (단, json은 허용하지 않음)
+
+## 날짜
+- 자바스크립트에서 날짜와 시간은 내장된 Date 객체에서 담당
+- 현재 날짜와 시간을 나타내는 객체를 만들 때 `new Date()` 사용
+- 특정 날짜에 해당하는 객체를 만들 때
+```javascript
+const halloween = new Date(2018, 9, 31);    // 월은 0에서 시작하기 때문에 9를 씀
+```
+- 특정 날짜와 시간에 해당하는 객체를 만들 때
+```javascript
+const halloweenParty = new Date(2018, 9, 31, 19, 0);    // 19:00
+```
+- 날짜 객체는 다음과 같은 값들을 가져올 수 있음
+```javascript
+halloweenParty.getFullYear();       // 2018
+halloweenParty.getMonth();          // 9
+halloweenParty.getDate();           // 31
+halloweenParty.getDay();            // 3 (수요일, 0이 일요일)
+halloweenParty.getHours();          // 19
+halloweenParty.getMinutes();        // 0
+halloweenParty.getSeconds();        // 0
+halloweenParty.getMilliseconds();   // 0
+```
+
+## 정규 표현식
+- regex, regexp라 씀
+- 문자열에 필요한 복잡한 검색과 교체 작업을 비교적 단순하게 만듦
+- 자바스크립트의 정규표현식은 RegExp 객체를 사용
+- 슬래시 한 쌍(/.../) 사이에 심볼을 넣는 리터럴 문법도 있음
+```javascript
+// 간단한 이메일 정규표현식
+const email = /\b[a-z0-9._-]+@[a-z_-]+(?:\.[a-z]+)+\b/;
+
+// 미국 전화번호 정규표현식
+const phone = /(:?\+1)?(:?\(\d{3}\}\s?|\d{3}[\s-]?)\d{3}[\s-]?\d{4}/;
+```
+
+# 맵과 셋
+- ES6에서는 Map과 Set, WeakMap과 WeakSet을 도입
+
+## 데이터 타입 변환
+
+#### 숫자로 바꾸기
+- Number 객체 생성자 사용
+```javascript
+const numStr = "33.3";
+const num = Number(numStr);     // 숫자로 변환, Number객체의 인스턴스가 아님
+```
+- 숫자로 바꿀 수 없는 문자열엔 NaN이 반환
+- parseInt나 parseFloat함수를 사용
+- parseInt를 사용할 때 기수값을 넘겨 몇 진수인지 지정가능
+- parseInt와 parseFloat 모두 숫자로 판단할 수 있는 부분까지만 변환, 그 뒤는 무시
+```javascript
+const a = parseInt("16 volts", 10);     // 16, volts는 무시
+const b = parseInt("3a", 16);           // 16진수 3a를 10진수로 변환 -> 58
+const c = parseFloat("15.5 kph");       // kph는 무시, parseFloat은 기수가 항상 10이라 가정
+```
+- Date 객체를 숫자로 변환할 때는 valueOf() 메소드를 사용
+```javascript
+const d = new Date();
+const ts = d.valueOf();     // 1970년 1월 1일 자정으로 부터 몇 밀리초가 지났는지 나타냄
+```
+- 불리언 값 변환은 조건 연산자를 사용
+```javascript
+const b = true;
+const n = b ? 1 : 0;
+```
+
+#### 문자열로 변환
+- toString()
+- 문자열 병합에서 자동으로 숫자를 문자열로 변환하므로 직접 바꿀 일은 많지 않음
+```javascript
+const n = 33.5;         // 숫자
+const s = n.toString()  // 문자열
+```
+- 객체의 문자열로 `[object Object]`와 같이 쓸모 없는 문자열로 반환
+- 배열의 문자열은 상대적으로 보기 좋게 나옴
+```javascript
+const arr = [1, true, "hello"];
+arr.toString();     // "1,true,hello"
+```
+
+#### 불리언으로 변환
+- 부정(!) 연산자를 써서 모든 값을 불리언으로 바꿀 수 있음
+- 부정 연산자를 한번 사용하면 false, 한번 더 쓰면 true
+```javascript
+const n = 0;            // 거짓을 나타내는 값
+const b1 = !!n;         // false
+const b2 = Boolean(n);  // false
+```
+
+## 요약
+- 자바스크립트에는 문자열, 숫자, 불리언, null, undefined, 심볼의 여섯가지 원시 타입과 객체 타입이 있음
+- 자바스크립트의 모든 숫자는 배정도 부동소수점 숫자(double)임
+- 날짜, 맵, 셋, 정규표현식 등은 자주 사용할 특수한 객체 타입
 
