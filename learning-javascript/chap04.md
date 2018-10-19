@@ -160,6 +160,10 @@ console.log(`\tending funds: ${funds}`);
 ```
 
 ## 자바스크립트의 제어문
+- 크게 조건문과 반복문으로 나뉨
+- 조건문은 if...else문, switch문, 반복문은 while문, do...while문, for문
+
+#### 제어문의 예외
 
 
 
