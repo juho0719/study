@@ -164,6 +164,181 @@ console.log(`\tending funds: ${funds}`);
 - 조건문은 if...else문, switch문, 반복문은 while문, do...while문, for문
 
 #### 제어문의 예외
+- break : 루프 중간에 빠져나감
+- continue : 루프에서 다음 단계로 바로 건너뜀
+- return : 제어문을 무시하고 현재 함수에서 빠져나감
+- throw : 예외를 일으킴
 
+#### if...else문을 체인으로 연결하기
+- if...else문을 여러개 연결 시키는 걸 의미
+```javascript
+if(new Date().getDay() === 3) {
+    totalBet = 1;
+} else if(funds === 7) {
+    totalBet = funds;
+} else {
+    console.log("No superstition here!");
+}
+```
 
+#### 메타 문법
+- 다른 문법을 설명하는 문법
+- `배커스-나우르 표기법 확장(EBNF, Extended Backus-Naur Form)`
+- 대괄호로 감싼 것은 옵션, 생략 부호(...)는 '여기에 들어갈 내용이 더 있다' 라는 뜻
+- 단어는 플레이스홀더로 사용
 
+while문
+```
+while(condition)
+    statement
+```
+
+if...else문
+```
+if(condition)
+    statement1
+[else
+    statement2]
+```
+
+do...while문
+```
+do
+    statement
+while(condition);
+```
+
+for문
+```
+for([initialization]; [condition]; [final-expression])
+    statement
+```
+
+#### for 루프의 다른 패턴
+- 쉼표 연산자를 쓰면 초기화와 마지막 표현식에 여러 문을 결합할 수 있음
+```javascript
+// 초기화 하면서 temp, i, j를 동시 선언, 마지막 표현식에서 세 변수를 동시 조작
+for(let temp, i=0, j=1; j<30; temp = i, i = j, j = i + temp)
+    console.log(j);
+```
+- for 루프의 제어부에 아무것도 쓰지 않으면 무한 루프
+```javascript
+for(;;) console.log("I will repeat forever!");
+```
+- for 루프는 보통 정수 인덱스를 사용하지만, 꼭 그래야 하는 것은 아님
+```javascript
+let s = '3';                        // 숫자가 들어가는 문자열
+for(; s.length<10; s = ' ' + s);    // 문자열의 길이가 조건
+                                    // for 루프 마지막에 세미콜론이 없으면 에러
+for(let x=0.2; x<3.0; x+=0.2) {     // 제어 변수가 정수가 아니어도 OK
+    console.log(x);
+for(; !player.isBroke;)             // 조건에 객체 프로퍼티
+    console.log("Still playing!");    
+}
+```
+
+#### switch 문
+- 조건 하나로 여러가지 중 하나를 선택할 때 유용
+```
+switch(expression) {
+    case value1:
+        // expression을 평가한 결과가 value1일 때 실행
+        [break;]
+    case value2:
+        // expression을 평가한 결과가 value2일 때 실행
+        [break;]
+    ...
+    case valueN:
+        // expression을 평가한 결과가 valueN일 때 실행
+        [break;]
+    default:
+        expression을 평가한 결과에 맞는 것이 없을 때 실행
+        [break;]
+}
+```
+- return문은 즉시 함수를 빠져나가므로 break 사용 불가
+```javascript
+function adjustBet(totalBet, funds) {
+    switch(totalBet) {
+        case 7:
+            return funds;
+        case 13:
+            return 0;
+        default:
+            return totalBet;
+    }
+}
+```
+
+#### for...in 루프
+- 객체의 프로퍼티에 루프를 실행하도록 설계
+```
+for(variable in object)
+    statement
+```
+```javascript
+const player = { name: 'Tomas', rank: 'Midshipman', age: 25};
+for(let prop in player) {
+    if(!player.hasOwnProperty(prop)) continue;
+    console.log(prop + ': ' + player[prop]);
+}
+```
+
+#### for...of 루프
+- ES6에 새로 생김.
+- 컬렉션의 요소에 루프를 실행하는 다른 방법
+```
+for(variable of object)
+    statement
+```
+```javascript
+const hand = [randFace(), randFace(), randFace()];
+for(let face of hand)
+    console.log(`You rolled...${face}!`);
+```
+- 배열에 루프를 실행해야 하지만 각 요소의 인덱스를 알 필요는 없을 때 알맞음
+
+## 유용한 제어문 패턴
+
+#### continue 문을 사용하여 조건 중첩 줄이기
+- 반복문안에 조건문을 써야 하는 경우
+```javascript
+while(funds > 1 && funds < 100) {
+    let totalBet = rand(1, funds);
+    if(totalBet === 13) {
+        console.log("Unlucky! Skip this round...");
+    } else {
+        // 플레이
+    }
+}
+```
+- 이런 경우를 `제어문 중첩(nested contorl flow)`이라 부름
+- continue문을 써서 이 구조를 더 간결하게
+```javascript
+while(funds > 1 && funds < 100) {
+    let totalBet = rand(1, funds);
+    if(totalBet === 13) {
+        console.log("Unlucky! Skip this round...");
+        continue;
+    } 
+    // 플레이...
+}
+```
+
+#### break나 return문을 써서 불필요한 연산 줄이기
+```javascript
+let firstPrime = null;
+for(let n of bigArrayOfNumbers) {
+    firstPrime = n;
+    break;
+}
+```
+- 이 루프가 함수 안에 있었다면 break대신 return문 써도 됨
+
+#### 루프를 완료한 뒤 인덱스 값 사용하기
+- break문을 사용하여 루프를 일찍 종료 했을 때에도 인덱스 값은 남아 있음
+- 이 패턴을 써서 break걸린 항목의 인덱스를 알 수 있음
+
+#### 배열을 수정할 때 감소하는 인덱스 사용하기
+- 인덱스는 커지는 데 요소를 제거하는 로직에서는 누락될 염려가 있음
+- 그럴 때 for문에서 감소하는 인덱스로 구현하면 괜찮음
