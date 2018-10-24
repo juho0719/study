@@ -96,3 +96,202 @@ f를 호출한 다음: o.message="f 안에서 수정함 (이전 값: '초기 값
 ```
 
 #### 매개변수가 함수를 결정하는가?
+- 자바스크립트는 매개변수에 따라 함수를 다르게 호출하지 않음. 매개변수가 한개든 두개든 같은 함수를 호출하는 것
+- 정해진 매개변수에 값을 제공하지 않으면 암시적으로 `undefined`가 할당됨
+```javascript
+function f(x) {
+    return `in f: x=${x}`;
+}
+f();    // "in f: x=undefined"
+```
+
+#### 매개변수 해체
+- 해체 할당과 마찬가지로 매개변수도 해체할 수 있음
+```javascript
+function getSentence({subject, verb, object}) {
+    return `${subject} ${verb} ${object}`;
+}
+
+const o = {
+    subject: "I",
+    verb: "love",
+    object: "JavaScript",
+};
+
+getSentence(o);     // "I love JavaScript"
+```
+- 프로퍼티 이름은 반드시 유효한 식별자여야 하고, 들어오는 객체에 해당 프로퍼티가 없는 변수는 `undefined`할당
+- 배열 역시 해체 가능
+```javascript
+function getSentence([subject, verb, object]) {
+    return `${subject} ${verb} ${object}`;
+}
+
+const arr = [ "I", "love", "JavaScript" ];
+getSentence(o);     // "I love JavaScript"
+```
+- 확장 연산자(...)를 써서 남은 매개변수를 이용할 수도 있음
+```javascript
+function addPrefix(prefix, ...words) {
+    const prefixedWords = [];
+    for(let i=0; i<words.length; i++) {
+        prefixedWords[i] = prefix + words[i];
+    }
+    return prefixedWords;
+}
+addPrefix("con", "verse", "vex");   // ["converse", "convex"]
+```
+- 확장 연산자는 반드시 마지막 매개변수이어야 함
+
+#### 매개변수 기본값
+- ES6에서는 매개변수에 기본값을 지정하는 기능이 추가
+```javascript
+function f(a,b = "default", c = 3) {
+    return `${a} - ${b} - ${c}`;
+}
+f(5, 6, 7);     // "5 - 6 - 7"
+f(5, 6);        // "5 - 6 - 3"
+f(5);           // "5 - default - 3"
+f();            // "undefined - default - 3"
+```
+
+## 객체의 프로퍼티인 함수
+- 객체의 프로퍼티인 함수를 메서드라 부름
+- 객체 리터럴에서도 메서드를 추가할 수 있음
+```javascript
+const o = {
+    name: 'Wallace',                        // 원시 값 프로퍼티
+    bark: function() {return 'Woof!';},     // 함수 프로퍼티(메서드)
+}
+```
+- ES6에서는 간편하게 메서드를 추가할 수 있는 문법이 새로 생김
+```javascript
+const o = {
+    name: 'Wallace',              // 원시 값 프로퍼티
+    bark() {return 'Woof!';},     // 함수 프로퍼티(메서드)
+}
+```
+
+## this 키워드
+- 함수 바디안에는 특별한 읽기 전용 값인 `this`가 있음
+- 메서드를 호출하면 `this`는 호출한 메서드를 소유하는 객체가 됨
+```javascript
+const o = {
+    name: 'Wallace',
+    speak() {return 'My name is ${this.name}!';},
+}
+```
+```javascript
+o.speak();  // "My name is Wallace!"
+```
+- this는 o에 묶임
+- this가 o에 묶인 이유는 speak가 o의 프로퍼티여서가 아니라, o에서 speak를 호출했기 때문
+```javascript
+const speak = o.speak;
+speak === o.speak;  // true; 두 변수는 같은 함수를 가르킴
+speak();            // "My name is undefined!"
+```
+- 함수를 이렇게 호출하면 자바스크립트는 이 함수가 어디에 속하는지 알 수 없으므로 this는 undefined에 묶임
+- 메서드는 객체 인스턴스에서 호출할 의도로 만든 함수
+- 중첩된 함수 안에서 this를 사용하려다 보면 혼란스러움
+```javascript
+const o = {
+    name: 'Julie',
+    greetBackwards: function() {
+        function getReverseName() {
+            let nameBackwards = '';
+            for (let i=this.name.length-1; i>=0; i--) {
+                nameBackwards += this.name[i];
+            }
+            return nameBackwards;
+        }
+        return `${getReverseName()} si eman ym ,olleH`;
+    },
+};
+o.greetBackwards();
+```
+- `o.greetBackwards()`를 호출할 때는 this를 o에 연결하지만, `getReverseName()`을 호출하면 this는 o가 아닌 undefined에 묶이게 됨
+- 이런 문제를 해결하기 위해 널리 사용하는 방법은 다른 변수에 this를 할당하는 방법
+```javascript
+const o = {
+    name: 'Julie',
+    greetBackwards: function() {
+        const self = this;
+        function getReverseName() {
+            let nameBackwards = '';
+            for(let i=self.name.length-1; i>=0; i--) {
+                nameBackwards += self.name[i];
+            }
+            return nameBackwards;
+        }
+        return `${getReverseName()} si eman ym ,olleH`;
+    },
+};
+o.greetBackwards();
+```
+- this를 self나 that에 할당하는 코드를 많이 봤을 것이다.
+
+## 함수 표현식과 익명 함수
+- 함수를 선언하면 함수에 바디와 식별자가 주어짐
+- 익명 함수는 함수에 식별자가 주어지지 않음
+- 함수 표현식으로 호출. 함수 표현식은 함수 이름을 생략할 수 있음
+```javascript
+const f = function() {
+    ...
+};
+```
+- 식별자 f가 함수를 카르킴
+- 함수 이름을 생략하지 않고 이름을 작성하고 변수에 할당하면?
+```javascript
+const g = function f() {
+    ...
+}
+```
+- g에 우선순위가 있음
+- 함수 바깥에서 함수에 접근할 때는 g를 써야 하며, f로 접근하려 하면 변수가 정의되지 않았다는 에러 생김
+```javascript
+const g = function f(stop) {
+    if(stop) console.log('f stopped');
+    f(true);
+};
+g(false);
+```
+- 함수안에서는 f를 써서 자기 자신을 참조하고 바깥에서는 g를 써서 함수를 호출
+
+## 화살표 표기법
+- ES6에서 새로 만든 화살표 표기법(arrow notation)도 환영받는 문법
+- function이라는 단어와 중괄호 숫자를 줄이려고 고안된 단축 문법
+- 화살표 함수에는 세 가지 단축 문법이 있음
+    - function을 생략해도 됨
+    - 함수에 매개변수가 단 하나 뿐이라면 괄호()를 생략해도 됨
+    - 함수 바디가 표현식 하나라면 중괄호와 return문도 생략 가능
+```javascript
+const f1 = function() { return "hello"; }
+// 또는
+const f1 = () => "hello";
+
+const f2 = function(name) { return `Hello, ${name}!`;}
+// 또는
+const f2 = name => `Hello, ${name}!`
+
+const f3 = function(a,b) { return a+b ;}
+// 또는
+const f3 = (a,b) => a + b;
+```
+- this가 다른 변수와 마찬가지로 정적으로 묶임
+```javascript
+const o = {
+    name: 'Julie",
+    greetBackwards: function() {
+        const getReverseName = () => {
+            let nameBackwards = '';
+            for(let i=this.name.length-1; i>=0; i--) {
+                nameBackwards += this.name[i]
+            }
+            return `${getReverseName()} si eman ym ,olleH`;
+        };
+        return `${getReverseName()} si eman ym ,olleH`;
+    },
+};
+o.greetBackwards();
+```
