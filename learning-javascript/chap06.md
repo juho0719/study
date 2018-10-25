@@ -281,7 +281,7 @@ const f3 = (a,b) => a + b;
 - this가 다른 변수와 마찬가지로 정적으로 묶임
 ```javascript
 const o = {
-    name: 'Julie",
+    name: 'Julie',
     greetBackwards: function() {
         const getReverseName = () => {
             let nameBackwards = '';
@@ -294,4 +294,74 @@ const o = {
     },
 };
 o.greetBackwards();
+```
+
+## call과 apply,bind
+- 자바스크립트에서는 일반적인 방법 외에도, 함수를 어디서, 어떻게 호출했느냐와 관계없이 `this`가 무엇인지 지정할 수 있음
+```javascript
+const bruce = { name: "Bruce" };
+const madeline = { name: "Madeline" };
+
+// 이 함수는 어떤 객체에도 연결되지 않았지만 this를 사용
+function greet() {
+    return `Hello, I'm ${this.name}!`;
+}
+
+greet();                // "Hello, I'm undefined!" - this는 어디에도 묶이지 않았음
+greet.call(bruce);      // "Hello, I'm Bruce!" - this는 bruce
+greet.call(madeline);   // "Heelo, I'm Madeline!" - this는 madeline
+```
+- call을 사용하고 this로 객체를 넘기면 해당 함수가 주어진 객체의 메서드인 것처럼 사용할 수 있음
+- call의 첫번째 매개변수는 this로 사용할 값이고, 매개변수가 더 있으면 호출하는 함수의 매개변수로 전달
+```javascript
+function update(birthYear, occupation) {
+    this.birthYear = birthYear;
+    this.occupation = occupation;
+}
+
+update.call(bruce, 1949, 'singer');     
+// bruce는 {name: "bruce", birthYear: 1949, occupation: "singer"}로 변경
+
+update.call(madeline, 1942, 'actress'); 
+// Madeline은 {name: "Madeline", birthYear: 1942, occupation: "actress"}로 변경
+```
+- apply는 함수 매개변수 처리 방법을 제외하면 call과 같음
+- apply는 매개변수를 배열로 받음
+```javascript
+update.call(bruce, [1955, "actor"]);     
+// bruce는 {name: "bruce", birthYear: 1949, occupation: "singer"}로 변경
+
+update.call(madeline, [1918, "writer"]); 
+// Madeline은 {name: "Madeline", birthYear: 1942, occupation: "actress"}로 변경
+```
+- apply는 배열 요소를 함수 매개변수로 사용해야 할 때 유용
+- 배열의 최대값, 최소값 구하는 것처럼 여러 데이터를 한꺼번에 넘겨 무언가를 처리할 때 좋음
+```javascript
+const arr = [2, 3, -5, 15, 7];
+Math.min.apply(null, arr);  // -5
+Math.max.apply(null, arr);  // 15
+```
+- 내장함수 Math는 this오 관계없이 동작하기 때문에 `null`을 넘겨도 상관없음
+- ES6의 확산 연산자(...)을 사용해도 apply와 같은 결과를 얻을 수 있음
+```javascript
+const newBruce = [1940, "martial artist"];
+update.call(bruce, ...newBruce);    // apply(bruce, newBruce)와 같음
+Math.min.apply(...newBruce);        // -5
+Math.max.apply(...newBruce);        // 15
+```
+- this의 값을 바꿀 수 있는 마지막 함수는 `bind`
+- bind를 사용하면 함수의 this값을 영구히 바꿀 수 있음
+- this의 값을 항상 `bruce`, call이나 apply, 다른 bind와 함께 호출하더라도 this 값이 항상 bruce가 되도록 하려면 bind사용
+```javascript
+const updateBruce = update.bind(bruce);
+
+updateBruce(1904, "actor");                 // bruce는 저 값으로 변경
+updateBruce.call(madeline, 1274, "king");   // madeline은 변하지 않음
+```
+- bind는 함수의 동작을 영구적으로 바꾸므로 찾기 어려운 버그의 원인이 될 수 있음
+- bind에 매개변수를 넘기면 항상 그 매개변수를 받으면서 호출되는 새 함수를 만드는 효과가 있음
+```javascript
+const updateBruce1949 = update.bind(bruce, 1949);
+updateBruce1949("singer, songwriter");
+// bruce는 {name: "bruce", birthYear: 1949, occupation: "singer, songwriter"} 임
 ```
