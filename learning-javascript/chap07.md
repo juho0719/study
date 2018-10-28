@@ -37,3 +37,17 @@ function f() {
 - 자신이 정의될 때 접근할 수 있었던 식별자에는 여전히 접근할 수 있지만 호출할 때 스코프에 있는 식별자에는 접근할 수 없음
 
 ## 전역 스코프
+- 프로그램이 시작할 때 암시적으로 주어지는 스코프
+- 전역 스코프에서 선언한 것은 전역 변수
+- 전역 변수를 남용하는 것이 나쁜 것. 원래 꼭 필요한 요소
+```javascript
+let name = "Irena";     // 전역
+let age = 25;           // 전역
+
+function greet() {
+    console.log(`Hello, ${name}!`);
+}
+function getBirthYear() {
+    return new Date().getFullYear() - age;
+}
+```
