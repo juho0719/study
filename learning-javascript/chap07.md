@@ -51,3 +51,77 @@ function getBirthYear() {
     return new Date().getFullYear() - age;
 }
 ```
+- 함수가 호출하는 컨텍스트(스코프)에 의존적
+- 어디에서든 상관없이 name값을 바굴 수 있어 버그 유발 확률 높음
+```javascript
+let user = {
+    name = "Irena",
+    age = 25,
+}
+function greet() {
+    console.log(`Hello, ${user.name}!`);
+}
+function getBirthYear() {
+    return new Date().getFullYear() - userage;
+}
+```
+- 위와 같이 단일 객체에 정보를 저장하는 것이 조금 더 낫지만 전역 객체를 사용한다는 점에선 변수와 크게 다르지 않음
+```javascript
+function greet(user) {
+    console.log(`Hello, ${user.name}!`);
+}
+function getBirthYear(user) {
+    return new Date().getFullYear() - userage;
+}
+```
+- 명시적으로 `user`를 받음으로써 전역 객체를 사용하지 않게 됨
+
+## 블록 스코프
+- 그 블록의 스코프에서만 보이는 식별자
+```javascript
+console.log('before block');
+{
+    console.log('inside block');
+    const x = 3;
+    console.log(x);     // 3
+}
+console.log(`outside block; x=${x}`);   // ReferenceError: x는 정의되지 않았습니다.
+```
+- 독립 블록을 사용한 예제이지만 많이 사용되진 않음
+
+## 변수 숨기기
+```javascript
+{
+    // 외부 블록
+    let x = 'blue';
+    console.log(x);     // "blue"
+    {
+        // 내부 블록
+        let x = 3;      // 외부 블록의 x는 가려짐
+        console.log(x); // "3"
+    }
+    console.log(x);     // "blue"
+}
+console.log(typeof x);  // "undefined"; x는 스코프에 있지 않음
+```
+- 내부 블록의 x는 이름만 같을 뿐 외부 블록의 x와 다름
+```javascript
+{
+    // 외부 블록
+    let x = { color: "blue" };
+    let y = x;
+    let z = 3;
+    {
+        // 내부 블록
+        let x = 5;              // 외부 블록의 x는 가려짐 (내부 x와는 별개)
+        console.log(x);         // 5
+        console.log(y.color);   // "blue"; y가 가르키는 x객체는 가려지지 않음
+        y.color = "red"; 
+        console.log(z);         // 3
+    }
+    console.log(x.color);       // "red"; 객체는 내부 스코프에서 수정
+    console.log(y.color);       // "red"; x와 y는 같은 객체
+    console.log(z);             // 3
+}
+```
+- 스코프의 계층적인 성격때문에 어떤 변수가 스코프에 있는지 확인하는 스코프 체인이란 개념이 생김
