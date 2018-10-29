@@ -127,4 +127,63 @@ console.log(typeof x);  // "undefined"; x는 스코프에 있지 않음
 - 스코프의 계층적인 성격때문에 어떤 변수가 스코프에 있는지 확인하는 스코프 체인이란 개념이 생김
 
 ## 함수, 클로저, 정적스코프
+- 최신 자바스크립트에서는 함수가 필요한 곳에서 즉석으로 정의할 때가 많음
+- 함수를 변수나 객체 프로퍼티에 할당하고, 배열에 추가하고, 다른 함수에 전달하고, 함수가 함수를 반환하고, 심지어 이름이 없을 때도 있음
+- 함수가 특정 스코프에 접근할 수 있도록 의도적으로 그 스코프에서 정의하는 것을 클로저라 함
+```javascript
+let globalFunc;             // 정의되지 않은 전역 함수
+{
+    let blockVer = 'a';     // 블록 스코프에 있는 변수
+    globalFunc = function() {
+        console.log(blockVar);
+    }
+}
+globalFunc();               // "a"
+```
+- globalFunc는 블록 안에서 값을 할당 받았음
+- 이 블록 스코프와 그 부모인 전역 스코프가 클로저를 형성함
+- globalFunc를 어디서 호출하든, 이 함수는 클로저에 들어있는 식별자에 접근할 수 있음
+- globalFunc를 호출하면, 이 함수는 스코프에서 빠져나왔음에도 blockVar에 접근할 수 있음
+- 일반적으로 스코프에서 빠져나가면 해당 스코프에서 선언한 변수는 메모리에서 제거해도 되지만, 여기서는 스코프안에서 정의했고, 해당 함수는 스코프 밖에서도 참조할 수 있으므로 스코프를 계속 유지함
+- 스코프안에서 함수를 정의하면 더 오래 유지
+```javascript
+let f;      // 정의되지 않은 함수
+{
+    let o = { note: 'Safe' };
+    f = function() {
+        return o;
+    }
+}
+let oRef = f();
+oRef.note = "Not so safe after all!";
+```
+- 일반적으로는 스코프 바깥쪽에 있는 것들에는 접근할 수 없지만 클로저를 만들면 접근할 수 없었던 것들에 접근할 방법이 생김
 
+## 즉시 호출하는 함수 표현식
+```javascript
+(function() {
+    // IIFE 바디
+})();
+```
+- 함수 표현식으로 익명 함수를 만들고, 그 함수를 즉시 호출함
+- `IIFE`의 장점은 내부에 있는 것들이 자신만의 스코프를 가지지만, IIFE 자체는 함수이므로 스코프 밖 무언가를 내보낼 수 있음
+```javascript
+const message = (function() {
+    const secret = "I'm a secret!";
+    return `The secret is ${secret.length} characters long.`;
+})();
+console.log(message);
+```
+- 변수 secret은 IIFE 스코프 안에서 안전하게 보호되며 외부에서 접근할 수 없음
+```javascript
+const f = (function() {
+    let count = 0;
+    return function() {
+        return `I have been called ${++count} time(s).`;
+    }
+})();
+f();    // "I have been called 1 time(s)."
+f();    // "I have been called 2 time(s)."
+```
+
+## 함수 스코프와 호이스팅
