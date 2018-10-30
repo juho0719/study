@@ -226,3 +226,35 @@ if(x === 3) {                       if(x === 3) {
 - 함수 선언 역시 끌어올려짐
 
 ## 함수 호이스팅
+- var로 선언된 변수와 마찬가지로 함수 선언도 스코프 맨 위로 끌어올려 짐
+```javascript
+f();    // 'f'
+function f() {
+    console.log('f');
+}
+```
+- 변수에 할당한 함수 표현식은 끌어올려지지 않음
+```javascript
+f();        // ReferenceError: f는 정의 되지 않았습니다.
+```
+
+## 사각지대
+- let으로 선언하는 변수는 선언하기 전까지 존재하지 않는다는 개념을 표현한 것
+- typeof 연산자는 변수가 선언됐는지 알아 볼때 많이 쓰임
+- let 키워드가 도입되고 변수의 사각지대가 생기면서 항상 안전하지 않음
+```javascript
+if(typeof x === "undefined") {
+    console.log("x doesn't exist or is undefined");
+} else {
+    // x를 사용해도 안전한 코드
+}
+let x = 5;
+```
+
+## 스트릭트 모드
+- ES5에서는 암시적 전역 변수(implicit global)가 생길 수 있었음
+- var로 변수 선언하지 않으면 자바스크립트는 전역 변수를 참조하려 함
+- 이런 이유로 스트릭트 모드(strict mode) 도입
+- 스트릭 모드는 암시적 전역 변수를 허용 하지 않음
+- "use strict"를 코드 맨앞에 사용하면 적용
+
