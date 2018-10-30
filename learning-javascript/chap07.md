@@ -187,3 +187,21 @@ f();    // "I have been called 2 time(s)."
 ```
 
 ## 함수 스코프와 호이스팅
+- ES6에서 let을 도입하기 전에는 var를 써서 변수 선언
+- 이렇게 선언된 변수들은 함수 스코프라 불림 (var로 선언한 전역 변수는 명시적인 함수 안에 있지는 않지만 함수 스코프와 동일하게 동작)
+- let으로 변수를 선언하면, 그 변수는 선언하기 전에는 존재하지 않음
+- var로 선언한 변수는 현재 스코프 안이라면 어디서든 사용할 수 있으며, 선언하기도 전에 사용할 수도 있음
+```javascript
+let var1;
+let var2 = undefined;
+var1;           // undefined
+var2;           // undefined
+undefineVar;    // ReferenceError: notDefined는 정의 되지 않았음
+```
+```javascript
+x;          // undefined
+var x = 3;  
+x;          // 3
+```
+- 위와 같이 변수 선언을 나중에 해도 var로 선언한 변수는 위로 끌어올림 (호이스팅)
+- 선언만 끌어올려지고, 할당은 끌어올려지지 않음
