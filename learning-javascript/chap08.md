@@ -48,3 +48,35 @@ const arr6 = new Array(1, 2, 3);    // [1, 2, 3]
 const arr7 = new Array(2);          // 길이가 2인 배열, 요소는 모두 undefined
 const arr8 = new Array("2");        // ["2"]
 ```
+
+## 배열 요소 조작
+- `push`는 배열 자체를 수정
+- `concat`은 새 배열 반환
+
+#### 배열의 처음이나 끝에서 요소 하나를 추가하거나 제거하기
+- 배열의 처음은 인덱스가 0인 요소
+- 배열의 끝은 배열이 arr이라면 arr.length - 1인 요소
+- push와 pop은 각각 배열의 끝에 요소를 추가하거나 제거
+- shift와 unshift는 각각 배열의 끝에 요소를 제거하거나 추가
+- push와 unshift는 새 요소를 추가해서 늘어난 길이를 반환하고, pop과 shift는 제거된 요소를 반환
+```javascript
+const arr = ["b", "c", "d"];
+arr.push("e");      // 4. arr은 이제 ["b", "c", "d", "e"]
+arr.pop();          // "e". arr은 이제 ["b", "c", "d"]
+arr.unshift("a");   // 4. arr은 이제 ["a", "b", "c", "d"]
+arr.shift();        // "a". arr은 이제 ["b", "c", "d"]
+```
+
+#### 배열의 끝에 여러 요소 추가하기
+- concat메서드는 배열의 끝에 여러 요소를 추가한 사본을 반환
+- concat에 배열을 넘기면 분해해서 원래 배열에 추가한 사본을 반환
+```javascript
+const arr = [1, 2, 3];
+arr.concat(4, 5, 6);        // [1, 2, 3, 4, 5, 6]. arr은 바뀌지 않습니다.
+arr.concat([4, 5, 6]);      // [1, 2, 3, 4, 5, 6]. arr은 바뀌지 않습니다.
+arr.concat([4, 5], 6);      // [1, 2, 3, 4, 5, 6]. arr은 바뀌지 않습니다.
+arr.concat(4, [5, 6]);      // [1, 2, 3, 4, [5, 6]]. arr은 바뀌지 않습니다.
+```
+- concat은 제공받은 배열을 한 번만 분해. 배열 안에 있는 배열을 다시 분해하지 않음
+
+#### 배열의 일부 가져오기
