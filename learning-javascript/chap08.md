@@ -280,6 +280,79 @@ cards.filter(c => c.value === 2);
 const arr = [5, 7, 2, 4];
 const sum = arr.reduce((a, x) => a += x, 0);
 ```
+- reduce의 콜백 함수는 매개변수로 누적값 a와 현재 배열 요소 x를 받음
+- 누적 값은 0으로 시작
+- 위의 예제를 실행하면 5+7+2+4인 18 리턴
+- 누적 값이 undefined로 시작한다면 첫 번째 배열 요소를 초기 값으로 보고 두 번째 요소부터 함수를 호출
+```javascript
+const arr = [5, 7, 2, 4];
+const sum = arr.reduce((a, x) => a += x);
+```
+- 초기 값을 5로 보고 7부터 수행
+- 객체 또한 누적값이 될 수 있음
+```javascript
+const words = ["Beachball", "Rodeo", "Angel",
+    "Aardvark", "Xylophone", "November", "Chocolate",
+    "Papaya", "Uniform", "Joker", "Clover", "Bali"];
+const alphabetical = words.reduce((a, x) => {
+    if(!a[x[0]]) a[x[0]] = []'
+    a[x[0]].push(x);
+    return a;
+}, {});
+```
+- 배열의 모든 요소에서 콜백 함수는 전 단계의 결과에 이 단어의 첫 번째 글자인 프로퍼티가 있는 지 확인
+- 그런 프로퍼티가 없다면 빈 배열 추가
+- 즉, "Beachball"을 만나면 a.B프로퍼티를 확인하는 데 그런 프로퍼티가 없으므로 빈 배열에 추가
+- reduce는 통계에도 사용
+```javascript
+const data = [3.3, 5, 7.2, 12, 4, 6, 10.3];
+// 도널드 커누스가 분산 계산을 위해 만든 알고리즘
+const stats = data.reduce((a, x) => {
+    a.N++;
+    let delta = x - a.mean;
+    a.mean += delta/a.N;
+    a.M2 += delta*(x - a.mean);
+    return a;
+}, { N: 0, mean: 0, M2: 0 });
+if(stats.N > 2) {
+    stats.variance = stats.M2 / (stats.N - 1);
+    stats.stdev = Math.sqrt(stats.variance);
+}
+```
+- mean과 M2를 사용해야 하므로 객체를 누적값으로 사용
 
+## 삭제되거나 정의되지 않은 요소들
+- map과 filter, reduce는 삭제되거나 정의되지 않은 요소들에서 콜백 함수를 호출하지 않음
+```javascript
+const arr = Array(10).map(function(x) { return 5 });
+// arr의 요소는 모두 undefined
+```
+- 배열의 중간 요소를 삭제하고 map을 호출하면 배열 가운데 '구멍'이 생김
+```javascript
+const arr = [1, 2, 3, 4, 5];
+delete arr[2];
+arr.map(x => 0);        // [0, 0, undefined, 0, 0]
+```
 
+## 문자열 병합
+- Array.prototype.join은 매개변수로 구분자를 하나 받고 요소들을 하나로 합친 문자열 반환
+- 이 매개변수가 생략됐을 때의 기본값은 쉼표. 
+- 문자열 요소를 합칠 때 정의 되지 않는 요소, 삭제된 요소, null, undefined는 모두 빈 문자열 취급
+```javascript
+const arr = [1, null, "hello", "world", true, undefined];
+delete arr[3];
+arr.join();         // "1,,hello,,true,"
+arr.join('');       // "1hellotrue"
+arr.join(' == ');   // "1 -- -- hello -- -- true -- --"
+```
+- 문자열 병합과 Array.prototype.join을 함께 쓰면 HTML <ul> 리스트 같은 것도 생성 가능
+- 빈 배열에 사용하면 빈 <li>요소 하나만 나옴
 
+## 요약
+- 배열 함수의 매개변수(순서대로)
+
+|-----|------|
+|메서드|설명|
+|-----|------|
+|reduce에만 적용|누적값, 초깃값 또는 마지막 호출에서 반환한 값|
+|모든 메서드|요소(현재 요소의 값)|
