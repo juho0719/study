@@ -148,3 +148,94 @@ const Car = (function() {
 ```
 
 #### 클래스는 함수다
+- ES5에서는 Car클래스를 다음과 같이 만듦
+```javascript
+function Car(make, model) {
+    this.make = make;
+    this.model = model;
+    this._userGears = ['P', 'N', 'R', 'D'];
+    this._userGear = this.userGears[0];
+}
+```
+- ES6에서 클래스가 바뀐 것은 아님. 단지 간편한 새 문법이 생긴 것
+
+#### 프로토타입
+- 클래스의 인스턴스에서 사용할 수 있는 메서드라고 하면 그건 프로토타입 메서드를 말하는 것
+- Car 인스턴스에서 사용할 수 있는 shift메서드는 프로토타입 메서드
+- Car.prototype.shift 처럼 표기
+- Array의 forEach를 Array.prototyep.forEach
+- 최근에는 포로토타입 메서드를 `#`으로 표시. Car.prototype.shitf를 Car#shift로 표기
+- 클래스는 항상 첫 글자를 대문자로 표기하기를 권장함
+- new키워드로 만든 새 객체는 생성자의 prototype 프로퍼티에 접근할 수 있음
+- 인스턴스는 생성자의 prototype프로퍼티를 `__proto__` 프로퍼티에 저장
+- `__proto__` 프로퍼티는 내부 동작 방식에 영향을 미침.
+- 밑줄 두개로 둘러싼 프로퍼티는 모두 그렇기 때문에 이를 수정하는 것은 위험한 행위
+- 프로토타입에서 중요한 것은 동적 디스패치
+- 여기서 디스패치는 메서드 호출과 같은 의미
+- 객체의 프로퍼티나 메서드에 접근하려 할 때 존재하지 않으면 자바스크립트는 객체의 프로토타입에서 해당 요소를 찾음
+- 클래스의 인스턴스는 모두 같은 프로토타입을 공유하므로 프로토타입에 프로퍼티나 메서드가 있다면 해당 클래스의 인스턴스는 모두 그 프로퍼티나 메서드에 접근 가능
+- 모든 인스턴스가 프로토타입 프로퍼티 값을 공유하지만 인스턴스 중 하나에 그런 이름의 프로퍼티가 있다면 해당 인스턴스는 프로토타입이 아니라 인스턴스에 있는 값을 사용함. 따라서 인스턴스에 초깃값이 필요하다면 생성자에서 만드는 것이 나음
+- 인스턴스에서 메서드나 프로퍼티를 정의하면 프로토타입에 잇는 것을 가리는 효과가 있음
+```javascript
+// Car 클래스는 이전에 만든 클래스
+const car1 = new Car();
+const car2 = new Car();
+car1.shift === Car.prototype.shift;     // true
+car1.shift('D');
+car1.shift('d');                        // error
+car1.userGear;                          // 'D'
+car1.shift === car2.shift               // true
+
+car1.shift = function(gear) { this.userGear = gear.toUpperCase(); }
+car1.shift === Car.prototype.shift;     // false
+car1.shift === car2.shift;              // false
+car1.shift('d');
+car1.userGear;                          // 'D'
+```
+- car1객체는 shift 메서드가 없지만, car1.shift('D')를 호출하면 car1의 프로토타입에서 메서드를 검색함
+- car1에 shift 메서드를 추가하면 car1과 프로토타입에 같은 이름의 메서드가 존재하게 됨
+- 이후에 car1.shift('d')를 호출하면 car1의 메서드가 호출되면서 프로토타입의 메서드는 무시됨
+
+#### 정적 메서드
+- 인스턴스 메서드 외에도 정적 메서드(클래스 메서드)가 있음
+- 이 메서드는 특정 인스턴스에 적용되지 않음
+- 정적메서드에서 this는 인스턴스가 아니라 클래스에 묶임
+- 일반적으로 정적 메서드에는 this대신 클래스 이름을 사용하는 것이 좋은 습관임
+- 정적 메서드는 클래스와 관련되지만 인스턴스와 관련이 없는 작업에 사용
+```javascript
+class Car {
+    static getNextVin() {
+        return Car.nextVin++;   // this.nextVin++라고 써도 되지만
+                                //  Car를 앞에 쓰면 정적메서드라는 점을 인식시켜줌
+    }
+    constructor(make, model) {
+        this.make = make;
+        this.model = model;
+        this.vin = Car.getNextVin();
+    }
+    static areSimilar(car1, car2) {
+        return car1.make === car2.make && car1.model === car2.model;
+    }
+    static areSame(car1, car2) {
+        return car1.vin === car2.vin;
+    }
+}
+Car.nextVin = 0;
+
+const car1 = new Car("Tesla", "S");
+const car2 = new Car("Mazda", "3");
+const car3 = new Car("Mazda", "3");
+
+car1.vin;       // 0
+car2.vin;       // 1
+car3.vin;       // 2
+
+Car.areSimilar(car1, car2); // false
+Car.areSimilar(car2, car3); // true
+Car.areSame(car2, car3);    // false
+Car.areSame(car2, car2);    // true
+```
+
+#### 상속
+- 클래스의 인스턴스는 클래스의 기능을 모두 상속
+- 
