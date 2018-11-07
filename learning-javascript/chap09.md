@@ -238,4 +238,59 @@ Car.areSame(car2, car2);    // true
 
 #### 상속
 - 클래스의 인스턴스는 클래스의 기능을 모두 상속
-- 
+- 객체의 프로토타입에서 메서드를 찾지 못하면 프로토타입의 프로토타입을 검색
+- 이렇게 계속 연결되어 찾아가는 것을 프로토타입 체인이라 함
+- 조건에 맞는 프로토타입을 찾을 때까지 계속 올라가다 결국 찾지 못하면 에러 발생
+```javascript
+class Vehicle {
+    constructor() {
+        this.passengers = [];
+        console.log("Vehicle created");
+    }
+    addPassenger(p) {
+        this.passengers.push(p);
+    }
+}
+
+class Car extends Vehicle {
+    constructor() {
+        super();
+        console.log("Car created");
+    }
+    deployAirbags() {
+        console.log("BWOOSH!");
+    }
+}
+```
+- `super()`는 슈퍼클래스의 생성자를 호출
+- 서브클래스에서 이 함수를 호출하지 않으면 에러 발생
+```javascript
+const v = new Vehicle();
+v.addPassenger("Frank");
+v.addPassenger("Judy");
+v.passengers;               // ["Frank", "Judy"]
+const c = new Car();
+c.addPassenger("Alice");
+c.addPassenger("Cameron");
+c.passengers;               // ["Alice", "Cameron"]
+v.deployAirbags();          // error
+c.deployAirbags();          // "BWOOSH!"
+```
+- 상속은 단방향. 하위 클래스는 상위 클래스의 모든 메서드에 접근할 수 있지만 반대는 불가능
+
+#### 다형성
+- 객체지향 언어에서 여러 슈퍼클래스의 멤버인 인스턴스를 가르킴
+- instanceof 연산자로 클래스의 인스턴스를 확인(prototype과 `__proto__`를 수정하지 않았다면 가능)
+```javascript
+class Motorcycle extends Vehicle {}
+const c = new Car();
+const m = new Motorcycle();
+c instanceof Car;           // true
+c instanceof Vehicle;       // true
+m instanceof Car;           // false
+m instanceof Motorcycle;    // true
+m instanceof Vehicle;       // true
+```
+- 자바스크립트의 모든 객체 루트 클래스는 Object이다.
+
+#### 객체 프로퍼티 나열 다시 보기
