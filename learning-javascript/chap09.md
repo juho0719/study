@@ -294,3 +294,101 @@ m instanceof Vehicle;       // true
 - 자바스크립트의 모든 객체 루트 클래스는 Object이다.
 
 #### 객체 프로퍼티 나열 다시 보기
+- 객체 obj와 프로퍼티 x에서 obj.hasOwnProperty(x)는 obj에 x가 있다면 true반환, x가 obj에 정의되어 있지 않거나 프로토타입 체인에만 정의되었다면 false
+- ES6클래스를 설계 의도대로 사용한다면 데이터 프로퍼티는 항상 프로토타입 체인이 아니라 인스턴스에 정의해야 함
+- 프로퍼티를 프로토타입에 정의하지 못하도록 강제하는 장치는 없으므로 확실히 확인하려면 항상 hasOwnProperty를 사용하는 편이 좋음
+```javascript
+class Super {
+    constructor() {
+        this.name = 'Super';
+        this.isSuper = true;
+    }
+}
+
+// 유효하지만, 권장하지 않음
+Super.prototype.sneaky = 'not recommended!';
+
+class Sub extends Super {
+    constructor() {
+        super();
+        this.name = 'Sub';
+        this.isSub = true;
+    }
+}
+const obj = new Sub();
+
+for(let p in obj) {
+    console.log(`${p}: ${obj[p]}` + (obj.hasOwnProperty(p)?'':'(inherited)'));
+}
+```
+- 위 프로그램을 실행한 결과
+```
+name: Sub
+isSuper: true
+isSub: true
+sneaky: not recommended! (inherited)
+```
+- name, isSuper, isSub 프로퍼티는 모두 프로토타입 체인이 아니라 인스턴스에 정의
+- 슈퍼클래스 생성자에서 선언한 프로퍼티는 서브클래스 인스턴에도 정의됨
+- Object.keys를 사용하면 프로토타입 체인에 정의된 프로퍼티를 나열하는 문제를 피할 수 있음
+
+#### 문자열 표현
+- 객체의 문자열 표현 : toString()
+- toString()의 기본 동작은 "[object Object]"인데 이건 거의 쓸모가 없음
+```javascript
+class Car {
+    toString() {
+        return `${this.make} ${this.model}: ${this.vin}`;
+    }
+}
+```
+- 위와 같이 정의하면 유용한 정보를 얻을 수 있음
+
+## 다중 상속, 믹스인, 인터페이스
+- 다중 상속은 슈퍼클래스를 두개 이상 가지는 것
+- 다중 상속을 지원하지 않는 언어가 많은 이유는 같은 이름의 메서드가 두 슈퍼클래스에 모두 있다면 어느 것을 적용해야 하는지 알 수 없기 때문에 문제가 발생되기 때문
+- 자바스크립트는 다중 상속이 필요한 문제에 대한 해답으로 믹스인 개념을 세움
+- 믹스인이란 기능을 필오한 만큼 섞어 놓은 것
+- 자바스크립트는 느슨한 타입을 사용하고 관대한 언어기 때문에 어떤 기능이라도 어떤 객체에 추가할 수 있음
+- 보험 가입 믹스인을 만들어보자
+```javascript
+class InsurancePolicy() {}
+function makeInsurable(o) [
+    o.addInsurancePolicy = function(p) { this.insurancePolicy = p; }
+    o.getInsurancePolicy = function() { return this.insurancePolicy; }
+    o.isInsured = function() { return !!this.insurancePolicy; }
+]
+```
+- 위의 로직에 Car를 대입하면
+```javascript
+const car1 = new Car();
+car1.addInsurancePolicy(new InsurancePolicy());     // error
+```
+- 자동차를 추상화한 개념을 보험에 가입시킬 순 없음
+- 보험을 가입하는 것은 개별 자동차임
+```javascript
+const car1 = new Car();
+makeInsurable(car1);
+car1.addInsurancePolicy(new InsurancePolicy());     // works
+```
+- 이 방법은 동작하긴 하지만, 모든 자동차에서 `makeInsurable()`을 호출해야 함
+```javascript
+makeInsurable(Car.prototype);
+const car1 = new Car();
+car1.addInsurancePolicy(new InsurancePolicy());     // works
+```
+- 믹스인이 모든 문제를 해결해 주지 않음
+- 보험 회사에서 shift메서드를 만들게 되면 Car클래스의 동작이 이상해짐
+- 심볼을 사용하면 이런 문제 일부를 경감할 수 있음
+```javascript
+class InsurancePolicy() {}
+const ADD_POLICY = Symbol();
+const GET_POLICY = Symbol();
+const IS_INSURED = Symbol();
+const _POLICY = Symbol();
+function makeInsurable(o) {
+    o[ADD_POLICY] = function(p) { this[_POLICY] = p; }
+    o[GET_POLICY] = function() { return this[_POLICY]; }
+    o[IS_INSURED] = function() { return !!this[_POLICY]; }
+}
+```
