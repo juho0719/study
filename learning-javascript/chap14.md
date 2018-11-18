@@ -75,3 +75,4 @@ const intervalId = setInterval(function() {
 - `clearTimeout`은 `setInterval`이 반환하는 ID를 받아 타임아웃을 멈춤
 - `setTimeout`, `setInterval`, `clearInterval`은 모두 전역 객체(브라우저에서는 window, 노드에서는 global)에 정의
 
+#### 스코프와 비동기적 실행
