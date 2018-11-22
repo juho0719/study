@@ -167,7 +167,76 @@ readSketchyFile();
 - 비동기적 코드가 늘어나면 늘어날수록 버그가 없고 관리하기 쉬운 코드를 작성하는 것이 매우 어려워짐. 그래서 프라미스가 등장함
 
 ## 프라미스
+- 콜백의 단점을 보완하지만 대체하는 건 아님
+- 프라미스에서도 콜백을 사용
+- 프라미스 없이 콜백만 사용했을 때 나타날 수 있는 엉뚱한 현상이나 찾기 힘든 버그를 해결
+- 비동기적 함수를 호출하면 프라미스 인스턴스를 반환
+- 프라미스는 성공(fulfilled)하거나 실패(rejectec), 둘 중 하나만
+- 프라미스는 객체이므로 어디든 전달할 수 있다는 점도 장점
+- 비동기적 처리를 여기서 하지 않고, 다른 함수에서 처리하게 하고 싶다면 프라미스를 넘기기만 하면 됨
 
+#### 프라미스 만들기
+- resolve(성공), reject(실패) 콜백이 있는 함수로 새 프라미스 인스턴스를 만들면 됨
+- `countdown`함수를 고쳐 매개변수를 받게 해 5초 카운트다운에 매이지 않게 하고 카운트다운이 끝나면 프라미스를 반환
+```javascript
+function countdown(seconds) {
+    return new Promise(function(resolve, reject) {
+        for(let i=seconds; i>=0; i--) {
+            setTimeout(function() {
+                if(i>0) console.log(i + '...');
+                else resolve(console.log("GO!"));
+            }, (seconds-i)*1000);
+        }
+    });
+}
+```
+- 이대로라면 좋은 함수는 아님
+- 너무 장황하고, 콘솔을 아예 쓰지 않기를 원할 수도 있음
 
+#### 프라미스 사용
+- 프라미스는 무시하고, `countdown(5)`처럼 호출해도 됨
+- 하지만 프라미스의 장점을 이용하고 싶다면?
+```javascript
+countdown(5).then(
+    function() {
+        console.log("countdown completed successfully");
+    },
+    function(err) {
+        console.log("countdown experienced an error: "+err.message);
+    }
+);
+```
+- 이 예제는 반환된 프라미스를 변수에 할당하지 않고, 바로 `then`핸들러를 호출
+- `then`핸들러는 성공 콜백과 실패 콜백을 받음
+- 경우의 수는 단 두가지, 성공 콜백이 실행되거나 에러 콜백이 실행되거나
+- catch핸들러도 지원하므로 핸들러를 둘로 나눠서 써도 됨
+```javascript
+const p = countdown(5);
+p.then(function() {
+    console.log("countdown completed successfully");
+});
+p.catch(function(err) {
+    console.log("countdown experienced an error: "+err.message);
+});
+```
 
+- `countdown`함수를 수정해서 에러가 발생되도록 만들어 봄
+```javascript
+function countdown(seconds) {
+    return new Promise(function(resolve, reject) {
+        for(let i=seconds; i>=0; i--) {
+            setTimeout(function() {
+                if(i===13) return reject(new Error("Oh my god"));
+                if(i>0) console.log(i + '...');
+                else resolve(console.log("GO!"));
+            }, (seconds-i)*1000);
+        }
+    });
+}
+```
+- 13이상의 숫자를 사용하면 13에서 에러가 발생
+- 하지만 콘솔에는 12부터 다시 카운트를 기록함.
+- reject나 resolve가 함수를 멈추게 하지 않음. 그저 상태만 관리함
+
+#### 이벤트
 
