@@ -239,6 +239,103 @@ function countdown(seconds) {
 - reject나 resolve가 함수를 멈추게 하지 않음. 그저 상태만 관리함
 
 #### 이벤트
+- 이벤트가 일어나면 이벤트 발생을 담당하는 개체(emitter)에서 이벤트가 일어났음을 알림
+- 필요한 이벤트는 콜백을 통해 모두 주시(listen)할 수 있음
+- 노드에는 이미 이벤트를 지원하는 모듈 `EventEmitter`가 내장되어 있음
+- 이 모듈을 써서 `countdown`함수를 개선해 보면
+```javascript
+const EventEmitter = require('events').EventEmitter;
 
+class Countdown extends EventEmitter {
+    constructor(seconds, superstitious) {
+        super();
+        this.seconds = seconds;
+        this.superstitious = !!superstitious;
+    }
+    go() {
+        const coundown = this;
+        return new Promise(function(resolve, reject) {
+            for(let i=countdown.seconds; i>=0; i--) {
+                setTimeout(function() {
+                    if(countdown.superstitious && i === 13)
+                        return reject(new Error("Oh my god"));
+                    countdown.emit('tick', i);
+                    if(i === 0) resolve();
+                }, (countdown.seconds-i)*1000);
+            }
+        });
+    }
+}
+```
+- `EventEmitter`를 상속하는 클래스는 이벤트를 발생시킬 수 있음
+- 카운트다운을 시작하고 프라미스를 반환하는 부분은 `go`메서드
+- `countdown`에 `this`를 할당하여 카운트다운이 얼마나 남았는지, 13인지 아닌지 확인
+- `this`는 특별한 변수이고 콜백안에서는 값이 달라짐
+- 따라서 `this`의 현재 값을 다른 변수에 저장해야 프라미스 안에서 쓸 수 있음
+- 여기에서 가장 중요한 부분은 `countdown.emit('tick', i)`임.
+- `tick`이벤트를 발생시키고 필요하다면 프로그램의 다른부분에서 이 이벤트를 주시할 수 있음
+```javascript
+const c = new Countdown(5);
 
-이벤트
+c.on('tick', function(i) {
+    if(i>0) console.log(i + '...');
+});
+c.go()
+    .then(function() {
+        console.log('GO!');
+    })
+    .catch(function(err) {
+        console.error(err.message);
+    })
+```
+- `EventEmitter`의 on메서드가 이벤트를 주시하는 부분
+- 이 예제는 `tick`이벤트 전체에 콜백을 등록
+- tick이 0이 아니면 출력한 다음 끝나면 GO!를 출력
+- `Countdown`인스턴스가 13에 도달했을 때 프라미스를 파기했는데도 카운트다운이 계속 진행되는 문제가 남음
+```javascript
+const c = new Countdown(15, true)
+    .on('tick', function(i) {       // 체인으로 연결해도 됨
+        if(i>0) console.log(i + '...');
+    });
+
+c.go()
+    .then(function() {
+        console.log('GO!');
+    })
+    .catch(function(err) {
+        console.error(err.message);
+    })
+```
+- 더 진행할 수 없다는 사실을 아는 즉시 대기중인 타임아웃을 모두 취소
+```javascript
+const EventEmitter = require('events').EventEmitter;
+
+class Countdown extends EventEmitter {
+    constructor(seconds, superstitious) {
+        super();
+        this.seconds = seconds;
+        this.superstitious = !!superstitious;
+    }
+    go() {
+        const coundown = this;
+        const timeoutIds = [];
+        return new Promise(function(resolve, reject) {
+            for(let i=countdown.seconds; i>=0; i--) {
+                timeoutIds.push(
+                    setTimeout(function() {
+                    if(countdown.superstitious && i === 13) {
+                        // 대기중인 타임아웃을 모두 취소
+                        timeoutIds.forEach(clearTimeout);
+                        return reject(new Error("Oh my god"));                        
+                    }
+                    countdown.emit('tick', i);
+                    if(i === 0) resolve();
+                }, (countdown.seconds-i)*1000));
+            }
+        });
+    }
+}
+```
+
+#### 프라미스 체인
+
