@@ -339,3 +339,222 @@ class Countdown extends EventEmitter {
 
 #### 프라미스 체인
 
+- 프라미스에는 체인으로 연결할 수 있다는 장점이 있음
+- 프라미스가 완료되면 다른 프라미스를 반환하는 함수를 즉시 호출할 수 있음
+- `launch`함수를 만들어 카운트다운이 끝나면 실행되게 함
+```javascript
+function launch() {
+    return new Promise(function(resolve, reject) {
+        console.log("Lift off!");
+        setTimeout(function() {
+            resolve("In orbit!");
+        }, 2*1000);
+    });
+}
+```
+- 이 함수를 카운트다운에 묶을 수 있음
+```javascript
+const c = new Countdown(5)
+    .on('tick', i => console.log(i + '...'));
+
+c.go()
+    .then(launch)
+    .then(function(msg) {
+        console.log(msg);
+    })
+    .catch(function(err) {
+        console.error("Houston, we have a problem....");
+    })
+```
+- 프라미스 체인을 사용하면 모든 단계에서 에러를 캐치할 필요 ㅇ벗음
+- 체인 어디에서든 에러가 생기면 체인 전체가 멈추고 `catch`핸들러가 동작
+
+#### 결정되지 않는 프라미스 방지하기
+- 프라미스는 비동기적 코드를 단순화하고 콜백이 두 번 이상 실행되는 문제를 방지
+- `resolve`나 `reject`를 호출하는 걸 잊어 프라미스가 결정되지 않는 문제까지 자동으로 해결하지는 못함
+- 에러가 일어나지 않아 이런 실수는 찾기 매우 어려움
+- 결정되지 않은 프라미스를 방지하는 한 가지 방법은 타임아웃을 거는 것
+- `launch`함수에 에러 조건을 넣고, 발사하는 로켓은 열 번에 다섯 번은 실패하는 로켓으로 작성
+```javascript
+function launch() {
+    return new Promise(function(resolve, reject) {
+        if(Math.random() < 0.5) return;
+        console.log("Lift off!");
+        setTimeout(function() {
+            resolve("In orbit!");
+        }, 2*1000);
+    });
+}
+```
+- 이 코드는 `reject`를 호출하지 않는데다가 콘솔에 기록하지도 않음
+- 열 번 시도하면 다섯 번은 영문도 모른 채 실패하는 셈
+- 타임아웃을 거는 함수를 만듦
+```javascript
+function addTimeout(fn, timeout) {
+    if(timeout === undefined) timeout = 1000;   // 타임아웃 값
+    return function(...args) {
+        return new Promise(function(resolve, reject) {
+            const tid = setTimeout(reject, timeout, new Error("promise timed out"));
+            fn(...args)
+                .then(function(...args) {
+                    clearTimeout(tid);
+                    resolve(...args);
+                })
+                .catch(function(...args) {
+                    clearTimeout(tid);
+                    reject(...args);
+                });
+        });
+    }
+}
+```
+- 가장 느린 로켓도 10초안에는 궤도에 들어갈 수 있다고 가정하면 타임아웃 값은 11초면 충분함
+```javascript
+c.go()
+    .then(addTimeout(launch, 11*1000))
+    .then(tunction(msg) {
+        console.log(msg);
+    })
+    .catch(function(err) {
+        console.error("Houston, we have a problem: " + err.message);
+    });
+```
+
+## 제너레이터
+- 함수와 호출자 사이의 양방향 통신을 가능하게 함
+- 원래 동기적인 성격을 가졌지만, 프라미스와 결합하면 비동기 코드를 효율적으로 관리할 수 있음
+- 파일 세 개를 읽고 1분간 기다린 다음 그 내용을 합쳐서 네 번째 파일에 쓰는 문제를 다시 보면..
+```javascript
+dataA = read contentes of 'a.txt'
+dataB = read contentes of 'b.txt'
+dataC = read contentes of 'c.txt'
+wait 60 seconds
+write dataA + dataB + dataC to 'd.txt'
+```
+- 제너레이터를 사용하면 이런 비슷한 코드를 작성 할 수 있음
+- 가장 먼저 할 일은 콜백을 프라미스로 바꾸는 일
+```javascript
+function nfcall(f, ...args) {
+    return new Promise(function(resolve, reject) {
+        f.call(null, ...args, function(err, ...args) {
+            if(err) return reject(err);
+            resolve(args.length<2 ? args[0] : args);
+        });
+    });
+}
+```
+- [Q 프라미스 라이브러리](https://github.com/kriskowal/q)의 `nfcall`메서드를 참고
+- setTimeout과 같은 기능을 가진 ptimeout(promise timeout) 함수를 새로 만듦
+```javascript
+function ptimeout(delay) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(resolve, delay);
+    });
+}
+```
+- 그 다음은 제너레이터 실행기 필요
+- 제너레이터는 호출자와 통신할 수 있어 제너레이터와의 통신을 관리하고 비동기적 호출을 처리하는 함수를 만들 수 있음
+```javascript
+function grun(g) {
+    const it = g();
+    (function iterate(val) {
+        const x = it.next(val);
+        if(!x.done) {
+            if(x.value instanceof Promise) {
+                x.value.then(iterate).catch(err => it.throw(err));
+            } else {
+                setTimeout(iterate, 0, x.value);
+            }
+        }
+    })();
+}
+```
+- [카일 심슨이 제너레이터에 관해 쓴 글](http://davidwalsh.name/es6-generators)에 있는 runGenerator를 기초로 만듦
+- `grun`은 기초적인 제너레이터 재귀 실행기
+- `yield`로 값을 넘긴 제너레이터는 이터레이터에서 next를 호출할 때까지 기다립니다.
+- `grun`은 그 과정을 재귀적으로 반복
+- `nfcall`은 과거의 방법인 노드 오류 우선 콜백을 프라미스에 적응시키고, `grun`은 미래의 기능을 현재로 가져옴
+```javascript
+function* theFutureIsNow() {
+    const dataA = yield nfcall(fs.readFile, 'a.txt');
+    const dataB = yield nfcall(fs.readFile, 'b.txt');
+    const dataC = yield nfcall(fs.readFile, 'c.txt');
+    yield ptimeout(60*1000);
+    yield nfcall(fs.writeFile, 'd.txt', dataA+dataB+dataC);
+}
+```
+- 콜백 헬보다는 낫고, 프라미스 하나만 쓸 때보다 더 단순
+- 실행 또한 간단함
+```javascript
+grun(theFutureIsNow):
+```
+
+#### 1보 전진과 2보 후퇴?
+- 세 개의 파일을 동시에 읽으면 더 효율적이지 않나?
+- `Promise`에는 `all`메서드가 있음
+- 이 메서드는 배열로 받은 프라미스가 모두 완료될 때 완료되며 가능하다면 비동기적 코드를 동시에 실행
+```javascript
+function* theFutureIsNow() {
+    const data = yield Promise.all([
+        nfcall(fs.readFile, 'a.txt'),
+        nfcall(fs.readFile, 'b.txt'),
+        nfcall(fs.readFile, 'c.txt'),
+    ]);
+    yield ptimeout(60*1000);
+    yield nfcall(fs.writeFile, 'd.txt', data[0]+data[1]+data[2]);
+}
+```
+- `Promise.all`이 반환하는 프라미스에는 매개변수로 주어진 각 프라미스의 완료 값이 배열에 들어있던 순서대로 있음
+- `c.txt`를 `a.txt`보다 먼저 읽더라도 data[0]에는 `a.txt`의 내용이 있음
+- `Promise.all`도 중요하지만 이 섹션에서 가장 중요한 것은 프로그램에서 어떤 부분을 동시에 실행할 수 있고 없는 지를 판단하는 것
+- 세 파일을 읽은 다음 60초를 기다리고 그 다음에 병합 결과를 파일에 저장하는 것이 중요하다면 예제와 같이 하면 됨
+- 세 파일을 읽는 것과 무관하게 60초 이상이 흐른 다음 네번째 파일에 결과를 저장하는 것이 중요하다면 타임아웃을 `Promise.all`에 옮기는 편이 좋음
+
+#### 제너레이터 실행기를 직접 만들지 마세요
+- [co](https://github.com/tj/co)는 기능이 풍부하고 잘 만들어진 제너레이터 실행기
+- 웹 사이트를 만들고 있다면 [Koa 미들웨어](http://koajs.com/)를 살펴보길 권함
+- `Koa`는 `co`와 함께 사용하도록 설계된 미들웨어
+
+#### 제너레이터 실행기와 예외 처리
+- 제너레이터 실행기를 쓰면 `try/catch`를 써서 예외 처리를 할 수 있다는 것도 중요한 장점
+- 콜백이나 프라미스를 사용하면 예외 처리가 쉽지 않음
+- 콜백에서 일으킨 예외는 그 콜백 밖에서 캐치할 수 없음
+- 제너레이터 실행기는 비동기적으로 실행하면서 동기적인 동작 방식을 유지하므로 `try/catch`와 함께 사용가능
+```javascript
+function* theFutureIsNow() {
+    let data;
+    try {
+        data = yield Promise.all([
+            nfcall(fs.readFile, 'a.txt'),
+            nfcall(fs.readFile, 'b.txt'),
+            nfcall(fs.readFile, 'c.txt'),
+        ]);
+    } catch(err) {
+        console.error("Unable to read one or more input files: " + err.message);
+        throw err;
+    }
+    yield ptimeout(60*1000);
+    try { 
+        yield nfcall(fs.writeFile, 'd.txt', data[0]+data[1]+data[2]);
+    } catch(err) {
+        console.error("Unable to write output file: " + err.message);
+        throw err;
+    }
+}
+```
+- `try/catch`를 통한 예외 처리가 프라미스의 catch 핸들러나 오류 우선 콜백보다 낫다고 하는 건 아님
+- `try/catch`도 널리 사용되는 구조이니, 동기적인 처리가 더 익숙하다면 예외처리에 `try/catch`를 사용하는 것도 좋음
+
+## 요약
+- 자바스크립트의 비동기적 실행은 콜백을 통해 이루어짐
+- 프라미스를 콜백 대신 사용할 수 있는 것은 아님. 프라미스도 콜백을 사용함
+- 프라미스는 콜백이 여러번 호출되는 문제를 해결
+- 콜백을 여러 번 호출해야 한다면 이벤트와 결합하는 방법을 생각할 수 있음(프라미스도 함께 쓸 수 있음)
+- 프라미스는 반드시 결정된다는(성공 또는 실패) 보장은 없음. 프라미스에 타임아웃을 걸면 이 문제가 해결
+- 프라미스는 체인으로 연결할 수 있음
+- 프라미스와 제너레이터 실행기를 결합하면 비동기적 실행의 장점을 그대로 유지하면서도 동기적인 사고방식으로 문제를 해결할 수 있음
+- 제너레이터를 써서 동기적인 사고방식으로 문제를 해결할 때는 프로그램의 어느 부분을 동시에 실행할 수 있는지 파악해야 함. 동시에 실행할 수 있는 부분은 `Promise.all`을 써서 실행
+- 제너레이터 실행기를 직접 만드는 고생말고, `co`나 `Koa`를 사용
+- 노드 스타일 콜백을 프라미스를 바꾸는 고생도 필요 없음. `Q` 사용
+- 제너레이터 실행기를 쓰면 예외 처리도 익숙한 방식으로 할 수 있음
+
