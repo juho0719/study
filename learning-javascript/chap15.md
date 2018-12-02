@@ -41,3 +41,56 @@ new Date('June 14, 1903 GMT-0000');     // 1903년 6월 14일 12시 (UTC)
 ```
 
 ## Moment.js
+- 타임존을 지원하는 버전과 지원하지 않는 버전 두 가지가 있음
+- CDN을 통해 불러올 수 있음
+```html
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.4.0/moment-timezone.min.js"></script>
+```
+- 노드를 사용할 때는 `npm install --save moment-timezone`으로 설치하고, `require`로 불러 옴
+```javascript
+const moment = require('moment-timezone');
+```
+
+## 날짜 데이터 만들기
+#### 서버에서 날짜 생성하기
+- 서버에서 날짜를 생성할 때는 타임존을 명시하는 편이 좋음
+- 특정 타임존에 있는 서버에서 날짜를 생성할 때는 `moment.tz`를 써서 Date인스턴스를 만들면 타임존을 직접 변환할 필요가 없음
+```javascript
+// Moment.js에 넘기는 배열은 자바스크립트의 Date 생성자에 넘기는 매개변수와 같음
+// 월은 0으로 시작
+// toDate() 메서드는 Moments.js 객체를 자바스크립트 Date 객체로 변환함
+const d = moment.tz([2018, 12, 2, 11, 1], 'America/Los_Angeles').toDate();
+const s = moment.tz([2108, 12, 2, 11, 1], 'Asia/Seoul').toDate();
+```
+
+## 날짜 데이터 전송하기
+- 자바스크립트에서 날짜를 전송하는 가장 확실한 방법은 JSON을 사용하는 것
+- 날짜는 JSON에서 1:1 대칭이 되게 파싱할 수 없으므로 JSON 명세에는 날짜에 대한 데이터 타입을 정의하지 않았음
+```javascript
+const before = { d: new Date() };
+before.d instanceof date        // true
+const json = JSON.stringify(before);
+const after = JSON.parse(json);
+after.d instanceof date         // false
+typeof after.d                  // "string"
+```
+- 즉, JSON으로 바로 날짜를 다룰 순 없지만, 전송된 문자열에서 날짜를 복구하는 것은 가능
+```javascript
+after.d = new Date(after.d);
+after.d instanceof date         // true
+```
+- 일단 JSON으로 인코드된 날짜는 UTC
+- 그리고 JSON으로 인코드된 문자열을 Date 생성자에 넘겨서 얻은 날짜는 사용자의 타임존을 기준으로 표시
+- 문자열로 인코드하지 않고, `valueOf()`메서드로 얻은 숫자를 그냥 전송해도 됨
+```javascript
+const before = { d: new Date().valueOf() };
+typeof before.d             // "number"
+const json = JSON.stringify(before);
+const after = JSON.parse(json);
+typeof after.d              // "number"
+const d = new Date(after.d);
+```
+- 다른 언어나 운영체제에서 제공하는 JSON라이브러리는 다르게 처리할 수 있으므로 다른 시스템과 날짜 데이터를 주고 받을 때는 그 시스템에서 날짜를 어떻게 직렬화하는지 알아둬야 함. 
+- 이런 상황에서는 유닉스 타임스탬프를 주고 받는 편이 더 안전함.
+
+## 날짜 형식
