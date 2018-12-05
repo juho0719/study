@@ -95,3 +95,25 @@ const d = new Date(after.d);
 
 ## 날짜 형식
 
+- Moments.js의 format 메서드를 써서 날짜를 우너하는 형식으로 만들 수 있음
+- 메타 문자가 포함된 문자열을 받고, 메타 문자는 그에 해당하는 날짜 구성 요소르 변환됨
+```javascript
+const d = new Date(Date.UTF(1930, 4, 10));
+
+// 로스엔젤레스 기준
+d.toLocaleDateString()          // "5/9/1930"
+d.toLocaleFormat()              // "5/9/1930 4:00:00 PM"
+d.toLocaleTimeString()          // "4:00:00 PM"
+d.toTimeString()                // "17:00:00 GMT-0700 (Pacific Daylight Time)"
+d.toUTCString()                 // "Sat, 10 May 1930, 00:00:00 GMT"
+
+moment(d).format("YYYY-MM-DD");                 // "1930-05-09"
+moment(d).format("YYYY-MM-DD HH:mm");           // "1930-05-09 17:00"
+moment(d).format("YYYY-MM-DD HH:mm Z");         // "1930-05-09 17:00 -07:00"
+moment(d).format("YYYY-MM-DD HH:mm [UTC]Z");    // "1930-05-09 17:00 UTC-07:00"
+moment(d).format("YYYY년 M월 D일 HH:mm");         // "1930년 5월 10일 09:00"
+
+moment(d).format("dddd, MMMM [the] Do, YYYY");  // "Fridday, May the 9th, 1930"
+
+moment(d).format("h:mm a");                     // "5:00 PM"
+```
