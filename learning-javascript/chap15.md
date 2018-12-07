@@ -117,3 +117,28 @@ moment(d).format("dddd, MMMM [the] Do, YYYY");  // "Fridday, May the 9th, 1930"
 
 moment(d).format("h:mm a");                     // "5:00 PM"
 ```
+
+## 날짜 구성 요소
+- Date인스턴스의 각 구성요소에 접근할 때는 다음과 같이 사용
+```javascript
+const d = new Date(Date.UTC(1815, 9, 10));
+
+// 로스엔젤레스 기준
+d.getFullYear()     // 1815
+d.getMonth()        // 9 (10월)
+d.getDate()         // 9
+d.getDay()          // 1 (월요일)
+d.getHours()        // 17
+d.getMinutes()      // 0
+d.getSeconds()      // 0 
+d.getMilliseconds() // 0
+
+// UTC 기준 메소드
+d.getUTCFullYear()  // 1815
+d.getUTCMonth()     // 9 (10월)
+d.getUTCDate()      // 10
+// ...etc
+```
+
+## 날짜 비교
+
