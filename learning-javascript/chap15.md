@@ -141,4 +141,69 @@ d.getUTCDate()      // 10
 ```
 
 ## 날짜 비교
+- Date인스턴스는 날짜를 숫자로 저장하므로 숫자에 쓸수 있는 비교 연산자를 그대로 쓰면 됨
+```javascript
+const d1 = new Date(1996, 2, 1);
+const d2 = new Date(2009, 4, 27);
+
+d1 > d2     // false
+d1 < d2     // true
+```
+
+## 날짜 연산
+- 날짜에서 날짜를 빼면 몇 밀리초가 지났는 지 알 수 있음
+```javascript
+const msDiff =  d2 - d1;                    // 417740400000 ms
+const daysDiff = msDiff/1000/60/60/24;      // 4834.96 days
+```
+- `Array.prototype.sort`를 써서 날짜를 정렬할 수도 있음
+```javascript
+const dates = [];
+
+// 랜덤한 날짜를 몇 개 만듦
+const min = new Date(2017, 0, 1).valueOf();
+const delta = new Date(2020, 0, 1).valueOf() - min;
+for(let i=0; i<10; i++)
+    dates.push(new Date(min + delta*Math.random()));
+
+// dates 배열은 랜덤으로 만들었으므로 뒤죽박죽일 것임
+// 다음과 같이 역순으로 정렬 할 수 있음
+dates.sort((a,b) => b - a);
+
+// 날짜순으로 정렬할 수도 있음
+dates.sort((a, b) => a - b);
+```
+- `Moment.js`에는 날짜를 빼거나 더하는 데 유용한 메서드도 많이 들어 있음
+```javascript
+let m = moment();           // 현재
+m.add(3, 'days');           // m은 이제 3일 뒤
+m.subtract(2, 'years');     // m은 이제 2년 전으로부터 3일이 지난 날짜입니다.
+
+m = moment();               // 리셋
+m.startOf('year');          // m은 이제 올해의 1월 1일
+m.endOf('month');           // m은 이제 올해의 1월 31일
+```
+- `Moment.js`는 메서드를 체인으로 연결할 수도 있음
+```javascript
+let m = moment()
+    .add(10, 'hours')
+    .subtract(3, 'days')
+    .endOf('month');
+// m은 이제 3일 전으로부터 10시간 뒤인 달의 마지막 순간
+```
+
+## 사용자가 알기 쉬운 상대적 날짜
+- '3일 전'처럼 날짜를 상대적으로 표시하면 알기 쉬움
+```javascript
+moment().subtract(10, 'seconds').fromNow();     // a few seconds ago
+moment().subtract(44, 'seconds').fromNow();     // a few seconds ago
+moment().subtract(5, 'minutes').fromNow();      // 5 minutes ago
+moment().subtract(5, 'hours').fromNow();        // 5 hours ago
+moment().subtract(5, 'days').fromNow();         // 5 days ago
+```
+
+## 요약
+- 자바스크립트의 날짜는 1970년 1월 1일 UTC로부터 몇 밀리초가 지났는지 나타내는 숫자
+- 날짜를 생성할 때는 타임존에 유의
+- 날짜형식을 자유롭게 바꿀 수 있어야 한다면 `moment.js`를 사용
 
