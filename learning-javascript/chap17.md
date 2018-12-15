@@ -104,5 +104,13 @@ X J A N L I O `N` A T U R E J X E E L N P
 ## 대체
 - 대소문자가 통일되지 않은 HTML 태그를 찾으려면 대체(alternation)을 통해 가능
 ```javascript
-const html = 
+const html = 'HTML with <a href="/one">one link</a>, and some Javascript.' + 
+    '<script src="stuff.js">';
+const matches = html.match(/area|a|link|script|source/ig);  // 첫 시도
 ```
+- 파이프(|)는 대체를 뜻하는 메타 문자
+- ig는 대소문자를 가리지 않고(i) 전체를(g) 검색하라는 뜻
+- g플래그가 없으면 일치하는 것 중 첫 번째만 반환
+- area를 a보다 먼저 쓴 이유는 정규식이 왼쪽에서 오른쪽으로 평가하기 때문. a를 먼저 썼다면 area를 찾더라도 a를 먼저 소비하므로 남은 rea는 어느 것에도 일치하지 않아 찾지 못함
+- 이 예제를 실행하면 의도하지 않은 <a>안의 link, HTML 태그가 아닌 a도 나옴
+
