@@ -114,3 +114,12 @@ const matches = html.match(/area|a|link|script|source/ig);  // 첫 시도
 - area를 a보다 먼저 쓴 이유는 정규식이 왼쪽에서 오른쪽으로 평가하기 때문. a를 먼저 썼다면 area를 찾더라도 a를 먼저 소비하므로 남은 rea는 어느 것에도 일치하지 않아 찾지 못함
 - 이 예제를 실행하면 의도하지 않은 <a>안의 link, HTML 태그가 아닌 a도 나옴
 
+## HTML 찾기
+- 정규식으로는 HTML을 분석(parse)할 수 없음
+- 100% 동작하는 것이 필요하다면 전용 파서를 찾아야 함
+```javascript
+const html = '<br> [!CDATA[[<br>]]';
+const matches = html.match(/<br>/ig);
+```
+- 이 예제에서 진짜 <br>은 하나. 다른 하나는 HTML이 아닌 글자 데이터(CDATA)
+- 정규식은 <p> 태그안에 <a>태그가 존재하는 것 같은 계층적 구조에 매우 취약
