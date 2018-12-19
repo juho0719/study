@@ -124,3 +124,30 @@ const matches = html.match(/<br>/ig);
 - 이 예제에서 진짜 <br>은 하나. 다른 하나는 HTML이 아닌 글자 데이터(CDATA)
 - 정규식은 <p> 태그안에 <a>태그가 존재하는 것 같은 계층적 구조에 매우 취약
 
+## 문자셋
+- 글자 하나를 다른 것으로 대체(alternation)하는 방법을 간단하게 줄인 것
+```javascript
+const beer99 = "99 bottles of beer on the wall " +
+    "take 1 down and pass it around -- " +
+    "98 bottles of beer on the wall.";
+const matches = beer99.match(/0|1|2|3|4|5|6|7|8|9/g);
+```
+- 위와 같은 방법은 숫자가 아니라 글자를 찾아야 한다면 다시 만들어야 함(좋은 방법이 아님)
+- 위 예제는 아래와 같이 고쳐쓸 수 있음 
+```javascript
+const m1 = beer99.match(/[0123456789]/g);   // 가능 
+const m2 = beer99.match(/[0-9]/g);          // 더 좋음
+```
+- 범위를 결합하는 것도 가능. 공백빼고 다 찾음
+```javascript
+const match = beer99.match(/[\-0-9a-z.]/ig);
+```
+- 순서는 중요하지 않음
+- 하이픈은 이스케이프 해야 함
+- 닫는 대괄호 바로 앞에 쓰는 하이픈은 이스케이프 하지 않아도 됨
+- 문자셋은 특정 문자, 또는 범위를 제외(negate)하고 찾을 수도 있음
+- 문자셋을 제외할 때는 다음과 같이 캐럿(^)을 맨 앞에 쓰면 됨
+```javascript
+const match = beer99.match(/[^\-0-9a-z.]/);
+```
+- 위 정규식은 원래 문자열에서 공백만 찾음
