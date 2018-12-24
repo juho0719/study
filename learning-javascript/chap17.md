@@ -225,4 +225,31 @@ const match = equation.match(/\(\d \+ \d\.\d\) \* \d/);
 - 정규식의 경우 `*`는 무엇이든 다 허용한다는 와일드카드와 의미가 다르므로 주의해야 함
 
 #### 진정한 와일드카드
+- 공백을 포함한 모든 문자 일치 [\s\S]
 
+## 그룹
+- 지금까지는 문자 단 한 개에 일치하는 것들을 주로 봄
+- 그룹을 사용하면 그 그룹에 일치하는 결과를 나중에 쓸 수 있도록 캡쳐 할 수도 있음 
+- 기본적으로 캡처하지 않는 그룹을 사용하길 권함
+- 캡처하지 않는 그룹을 사용하면 성능상 장점이 있고, 일치하는 결과를 나중에 쓸 필요가 없다면 캡처하지 않는 그룹을 써야 함
+- 캡처하지 않는 그룹은 (?:[subexpression])형태이고, 여기서 [subexpression]이 일치시켜려 하는 패턴
+- 도메인 이름을 `.com` `.org` `.edu`만 찾는다고 가정하면 
+```javascript
+const test = "Visite oreilly.com today";
+const math = test.match(/[a-z]+(?:\.com|\.org||\.edu)/i);
+```
+- 그룹도 반복 가능
+- 반복은 일반적으로 반복 메타 문자의 바로 왼쪽에 있는 문자 하나에 적용되지만, 그룹을 사용하면 전체에 반복 적용 
+- 자주 쓰이는 예제는 `http://` `https://` 로 시작하는 URL을 찾으려 한다면 그룹과 함께 0, 1개에 일치하는 메타 문자를 쓰면 됨
+```javascript
+const html = '<link rel="stylesheet" href="http://insecure.com/stuff.css">\n' +
+    '<link rel="stylesheet" href="https://secure.com/securestuff.css">\n' +
+    '<link rel="stylesheet" href="//anything.com/flexible.css">';
+
+const matches = html.match(/(?:https?)?\/\/[a-z][a-z0-9-]+[a-z0-9]+/ig);
+```
+- 정규식 시작에는 캡처하지 않는 그룹 `(?:http?)?`
+- 여기에는 0또는 1메타 문자가 두개 있음
+- 그 중 처음은 's는 옵션이다'라는 뜻
+
+## 소극적 일치, 적극적 일치
