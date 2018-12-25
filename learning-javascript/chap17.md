@@ -253,3 +253,17 @@ const matches = html.match(/(?:https?)?\/\/[a-z][a-z0-9-]+[a-z0-9]+/ig);
 - 그 중 처음은 's는 옵션이다'라는 뜻
 
 ## 소극적 일치, 적극적 일치
+- 정규식은 기본적으로 적극적 일치
+- 검색을 멈추기 전에 최대한 많이 찾으려고 함
+- HTML텍스트에서 <i>태그를 <strong>으로 바꿔야 한다면
+```javascript
+const input = "Regex pros know the difference between\n" +
+    "<i>greedy</i> and <i>lazy</i> matching.";
+input.replace(/<i>(.*)<\/i>/ig, '<strong>$1</strong>');
+```
+- 교체 문자열 $1은 .*그룹에 일치하는 문자열로 바뀜
+- 위와 같이 하면 우리 의도와는 다른 결과값이 나옴
+```
+"Regex pros know the difference between
+<strong>greedy</i> and <i>lazy</strong> matching."
+```
