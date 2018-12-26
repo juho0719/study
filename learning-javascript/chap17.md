@@ -255,24 +255,65 @@ const matches = html.match(/(?:https?)?\/\/[a-z][a-z0-9-]+[a-z0-9]+/ig);
 ## 소극적 일치, 적극적 일치
 - 정규식은 기본적으로 적극적 일치
 - 검색을 멈추기 전에 최대한 많이 찾으려고 함
-- HTML텍스트에서 <i>태그를 <strong>으로 바꿔야 한다면
+- HTML텍스트에서 `<i>`태그를 `<strong>`으로 바꿔야 한다면
 ```javascript
 const input = "Regex pros know the difference between\n" +
     "<i>greedy</i> and <i>lazy</i> matching.";
 input.replace(/<i>(.*)<\/i>/ig, '<strong>$1</strong>');
 ```
-- 교체 문자열 $1은 .*그룹에 일치하는 문자열로 바뀜
+- 교체 문자열 `$1`은 `.*`그룹에 일치하는 문자열로 바뀜
 - 위와 같이 하면 우리 의도와는 다른 결과값이 나옴
 ```
 "Regex pros know the difference between
 <strong>greedy</i> and <i>lazy</strong> matching."
 ```
 - 정규식은 일치할 가능성이 있는 동안은 문자를 소비하지 않고 계속 넘어감
-- <i>를 만나면 </i>를 더는 찾을 수 없을 때까지 소비하지 않고 진행
-- 원래 문자열에는 </i>가 두개 있으므로, 첫 번째 것은 무시하고 두 번째것에서 일치한다고 판단
-- 반복 메타 문자 *뒤에 ?를 붙이면 소극적으로 검색 
+- `<i>`를 만나면 `</i>`를 더는 찾을 수 없을 때까지 소비하지 않고 진행
+- 원래 문자열에는 `</i>`가 두개 있으므로, 첫 번째 것은 무시하고 두 번째것에서 일치한다고 판단
+- 반복 메타 문자 `*`뒤에 `?`를 붙이면 소극적으로 검색 
 ```javascript
 input.replace(/<i>(.*?)<\/i>/ig, '<strong>$1</strong>');
 ```
 
 ## 역참조
+- `XYYX` 형태의 이름을 찾는 다면? (PJJP, GOOG, ANNA와 같은)
+```javascript
+const promo = "Opening ofr XAAX is the dynamic GOOG! At the box office now!";
+const bands = promo.match(/([A-Z])([A-Z])\2\1/g);
+```
+- 첫 번째 그룹이 X에 일치하고, 두 번째 그룹이 A에 일치한다면, `\2`는 A이고, `\1`은 X이다.
+- 따옴표의 짝을 찾을 때 유용하게 쓰임
+```javascript
+// 작은 따옴표와 큰 따옴표를 모두 썼으므로 백틱으로 문자열 경계를 나타냄
+const html = `<img alt='A "simple" example.'>` +
+    `<img alt="Don't abuse it!">`;
+const matches = html.match(/<img alt=(['"]).*?\1/g);
+```
+
+## 그룹 교체
+- `<a>`태그에서 href가 아닌 속성을 전부 제거하려면?
+```javascript
+let html = '<a class="nope" href="/yep">Yep</a>';
+html = html.replace(/<a .*?(href=".*?").*?>/, '<a $1>');
+```
+- 모든 그룹은 1로 시작하는 숫자를 할당
+- 정규식에서 첫 번째 그룹은 `\1`이고 교체할 문자열에서는 `$1`이 첫 번째 그룹에 해당
+- 소극적 일치를 써서 다른 `<a>`태그까지 검색이 확장되는 일을 막음
+- href 속성의 값에 큰따옴표가 아니라 작은따옴표를 쓴 문자열에서는 아무것도 찾지 못함
+- 이번엔 `class`속성과 `href`속성을 나믹고 나머지는 모두 없앤다면?
+```javascript
+let html = '<a class="yep" href="/yep" id="nope">Yep</a>';
+html = html.replace(/<a .*?(class=".*?").*?(href=".*?").*?>/, '<a $2 $1>');
+```
+- 이 정규식에서는 `class`와 `href`의 순서를 바꾸므로 결과 문자열에서는 `href`가 앞에 옴
+- `$1`, `$2`등 숫자로 참조하는 것 외에도 일치하는 것 앞에 잇는 전부를 참조하는 ``$` ``, 일치하는 것 자체인 `$&`, 일치하는 것 뒤에 있는 전부를 참조하는 `$'`도 있음
+- 달러 기호가 필요할때는 `$$`를 사용
+```javascript
+const input = "One two three";
+input.replace(/two/, '($`)');       // "One (One ) three"
+input.replace(/two/, '($&)');       // "One (two ) three"
+input.replace(/two/, "($')");       // "One ( three) three"
+input.replace(/two/, '($$)');       // "One ($) three"
+```
+
+## 함수를 이용한 교체
