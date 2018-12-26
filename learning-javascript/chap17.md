@@ -267,3 +267,12 @@ input.replace(/<i>(.*)<\/i>/ig, '<strong>$1</strong>');
 "Regex pros know the difference between
 <strong>greedy</i> and <i>lazy</strong> matching."
 ```
+- 정규식은 일치할 가능성이 있는 동안은 문자를 소비하지 않고 계속 넘어감
+- <i>를 만나면 </i>를 더는 찾을 수 없을 때까지 소비하지 않고 진행
+- 원래 문자열에는 </i>가 두개 있으므로, 첫 번째 것은 무시하고 두 번째것에서 일치한다고 판단
+- 반복 메타 문자 *뒤에 ?를 붙이면 소극적으로 검색 
+```javascript
+input.replace(/<i>(.*?)<\/i>/ig, '<strong>$1</strong>');
+```
+
+## 역참조
