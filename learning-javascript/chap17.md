@@ -317,3 +317,13 @@ input.replace(/two/, '($$)');       // "One ($) three"
 ```
 
 ## 함수를 이용한 교체
+- 함수를 이용하면 좀 더 단순한 정규식으로 분할할 수 있음
+- `<a>`태그를 정확한 규격에 맞도록 바꾸는 예제
+- 이 규격은 `class`, `id`, `href`를 제외한 나머지 속성은 모두 제거
+```javascript
+const html = 
+    `<a class="foo" href="/foo" id="foo">Foo</a>\n` +
+    `<A href='/bar' Class="bar">Bar</a>\n` +
+    `<a href="/baz">Baz</a>\n` +
+    `<a onclick="javascript:alert('qux!')" href="/qux">Qux</a>`;
+```
