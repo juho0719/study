@@ -327,3 +327,51 @@ const html =
     `<a href="/baz">Baz</a>\n` +
     `<a onclick="javascript:alert('qux!')" href="/qux">Qux</a>`;
 ```
+- 테스트할 문자열만 보면 정규식만으로 해결하기 어려움 (경우의 수가 많음)
+- `<a>`태그를 인식하는 정규식, `<a>`태그의 속성 중에서 필요한 것만 남기는 정규식, 이렇게 두개를 쓰면 됨
+- 정규식만 사용하면 속성의 순서때문에 문제가 생길 수 있으므로 `String.prototype.split`을 이용하여 한 번에 한가지 속성만 체크하는 방법을 사용
+```javascript
+function sanitizeATag(aTag) {
+    // 태그에서 원하는 부분 추출
+    const parts = aTag.match(/<a\s+(.*?)>(.*?)<\/a>/i);
+    // parts[1]은 여는 <a>태그에 들어있는 속성
+    // parts[2]는 <a>와 </a>사이에 있는 텍스트
+    const attributes = parts[1]
+        // 속성을 분해
+        .split(/\s+/);
+    return '<a ' + attributes
+        // class, id, href 속성만 필요    
+        .filter(attr => /^(?:class|id|href)[\s=]/i.test(attr))
+        // 스페이스 한칸으로 구분해서 합침
+        .join(' ')
+        // 여는 <a>태그 완성 
+        + '>'
+        // 텍스트 추가 
+        + parts[2]
+        // 태그 닫음 
+        + '</a>';
+}
+```
+- 이 함수는 정규식을 여러개 사용 
+- 하나는 `<a>`태그의 각 부분을 찾는 데 사용, 다른 하나는 하나 이상의 공백을 찾아 문자열을 분리하는 데 사용
+- `String.prototype.replace`에는 교체할 매개변수로 함수를 넘길 수 있음
+```javascript
+html.replace(/<a .*?>(.*?)<\/a>/ig, function(m, g1, offset) {
+    console.log(`<a> tag found at ${offset}, contents: ${g1}`);
+})
+```
+- `String.prototype.replace`에 넘기는 함수는 다음 순서대로 매개변수를 받음 
+    - m : 일치하는 문자열 전체($&와 같음)
+    - g1 : 일치하는 그룹(일치하는 것이 있다면). 일치하는 것이 여럿이라면 매개변수도 여러 개 
+    - offset : 원래 문자열에서 일치하는 곳의 오프셋(숫자)
+    - 원래 문자열(거의 사용하지 않음)
+- `sanitizeATag`함수는 `<a>`태그가 들어있는 HTML 블록에 사용하려고 만듬 
+```javascript
+html.replace(/<a .*?<\/a>/ig, function(m) {
+    return sanitizeATag(m);
+});
+```
+- `sanitizeATag`함수는 `String.prototype.replace`에서 콜백 함수에 넘기는 매개변수를 그대로 받으므로 아래와 같이 더 간단하게 표현 가능
+```javascript
+html.replace(/<a .*?<\/a>/ig, sanitizeATag);
+```
