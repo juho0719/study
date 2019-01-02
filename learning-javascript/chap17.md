@@ -375,3 +375,46 @@ html.replace(/<a .*?<\/a>/ig, function(m) {
 ```javascript
 html.replace(/<a .*?<\/a>/ig, sanitizeATag);
 ```
+
+## 위치 지정
+- 문자열을 다루다보면 `~~으로 시작하는 문자열`, `__으로 끝나는 문자열`, `그 문자열의 처음`하는 식으로 생각할 때가 있음 
+- 여기서 `~~`, `__`을 정규식의 앵커(anchor)라 부름
+- `^`앵커는 문자열의 맨 처음, `$`앵커는 문자열의 마지막을 나타냄
+```javascript
+const input = "It was best of times, it was the worst of times";
+const beginning = input.match(/^\w+/g);     // "It"
+const end = input.match(/\w+$/g);           // "times"
+const everything = input.match(/^.*$/g);    // input과 같음
+const nomatch1 = input.match(/^best/ig);
+const nomatch2 = input.match(/worst$/ig);
+```
+- 앵커는 문자열에 줄바꿈 문자가 들어 있다면 각 줄의 처음과 끝을 찾을 수 있음. `m`플래그를 쓰면 됨 
+```javascript
+const input = "One line\nTwo lines\nThree lines\nFour";
+const beginnings = input.match(/^\w+/mg);   // ["One", "Two", "Three", "Four"]
+const endings = input.match(/\w+$/mg);      // ["line", "lines", "lines", "Four"]
+```
+
+## 단어 경계 일치
+- 단어 경게 메타 문자인 `\b`와 `\B`는 앵커와 마찬가지로 입력을 소비하지 않음
+- 단어 경계는 알파벳 또는 숫자(\w)로 시작하는 부분, 알파벳이나 숫자가 아닌 문자(\W)로 끝나는 부분, 또는 문자열의 시작이나 끝에 일치 
+- 영어 텍스트 안에 들어있는 이메일 주소를 찾아 하이퍼링크로 바꾸는 예제
+```javascript
+const inputs = [
+    "john@doe.com",                 // 이메일 주소만 있음
+    "john@doe.com is my email",     // 이메일 주소로 시작
+    "my email is john@doe.com",     // 이메일 주소로 끝남
+    "use john@doe.com, my email",   // 이메일 주소가 중간에 있고, 바로 뒤에 쉼표가 있음 
+    "my email:john@doe.com",        // 이메일 주소 주위에 구두점이 있음
+];
+```
+- 이메일 주소의 공통점은 단어 경계 사이에 있다는 것 
+- 이메일 주소인 `john@doe.com`에서 `j`가 보존되고, `m`다음의 문자 역시 보존되므로 `다시 넣는`방법을 생각할 필요가 없음 
+```javascript
+const emailMatcher =
+    /\b[a-z][a-z0-9._-]*@[a-z][a-z0-9_-]+\.[a-z]+(?:\.[a-z]+)?\b/ig;
+input.map(s => s.replace(emailMatcher, '<a href="mailto:%&">$&</a>'));
+```
+- 단어 경계는 특정 단어로 시작하거나, 특정 단어로 끝나거나, 특정 단어를 포함하는 텍스트를 찾을 때도 유용
+
+## 룩어헤드
