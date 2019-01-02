@@ -418,3 +418,43 @@ input.map(s => s.replace(emailMatcher, '<a href="mailto:%&">$&</a>'));
 - 단어 경계는 특정 단어로 시작하거나, 특정 단어로 끝나거나, 특정 단어를 포함하는 텍스트를 찾을 때도 유용
 
 ## 룩어헤드
+- 적극적 일치, 소극적 일치, 여기에 더해 룩어헤드(lookahead)까지 이해하면 정규식을 마스터했다고 해도 과언이 아님
+- 룩어헤드는 앵커나 단어 경계와 마찬가지로 입력을 소비하지 않음
+- 하위 표현식도 소비하지 않고 찾을 수 있으므로, 앵커나 단어 경계보다 범용적으로 사용 가능 
+- 단어 경계에서 `다시 넣는`방법을 고민할 필요가 없는 특징 역시 룩어헤드에도 적용
+- 문자열이 겹치는(overlapping)상황에 필요하고, 룩어헤드를 써서 단순화시킬 수 있는 패턴이 많음 
+- 비밀번호 규칙이 맞는 지 검사하는 예제
+- 비밀번호에는 대문자와 소문자, 숫자가 최소한 하나씩 포함되어야 하고, 글자도 아니고 숫자도 아닌 문자는 들어갈 수 없다고 하면 정규식을 여러 개 쓰는 방법으로 해결할 수 있음
+```javascript
+function validPassword(p) {
+    return /[A-Z]/.test(p) &&       // 대문자가 최소한 하나
+        /[a-z]/.test(p) &&          // 소문자가 최소한 하나 
+        /[0-9]/.test(p) &&          // 숫자가 최소한 하나
+        !/[^a-zA-Z0-9]/.test(p);    // 영문자와 숫자만 허용
+}
+```
+- 자바스크립트의 룩어헤드는(?=[subexpression])형태
+- 하위 표현식 뒤에 이어지지 않는 것만 찾는 부정형 룩어헤드(?![subexpression])도 있음 
+- 룩어헤드를 쓰면 정규식 하나로 비밀번호의 유효성을 검사할 수 있음 
+```javascript
+function validPassword(p) {
+    return /(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])(?!.*[^a-zA-Z0-9])/.test(p);
+}
+```
+
+## 동적으로 정규식 만들기
+- 이 장 초반에 `RegExp` 생성자보다 정규식 리터럴을 쓰는 편이 좋다고 했었음 
+- 정규식 리터럴을 쓰면 타이핑하는 수고도 덜 수 있고, 역슬래시를 사용한 이스케이프도 줄어듬
+- `RegExp` 생성자가 필요할 때도 있는 데, 동적으로 정규식을 만들어야 할 때가 그런 경우임
+- 사용자 이름의 배열이 있고, 문자열에서 그 배열을 사용해 일치하는 사용자 이름을 찾는 예제
+```javascript
+const users = ["mary", "nick", "arthur", "sam", "yvette"];
+const text = "User @arthur started the backup and 15:15, " +
+    "and @nick and @yvette restored it at 18:35.";
+const userRegex = new RegExp(`@(?:${users.join('|')})\\b`, 'g');
+text.match(userRegex);  // ["@arthur", "@nick", "@yvette"]
+```
+- 이 예제에서 사용한 정규식을 리터럴로 만든다면? `/@(?:mary|nick|arthur|sam|yvette)\b/g`
+
+## 요약
+- [정규식 101](https://regex101.com/javascript)같은 잘 만들어진 테스터를 쓰면 익숙해진 뒤에도 큰 도움이 됨
