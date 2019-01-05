@@ -112,4 +112,74 @@ const paragraphs = document.getElementsByTagName('p');
 
 ## DOM 요소 조작
 - 모든 요소에는 `textContent`와 `innerHTML` 프로퍼티가 있음 
-- 
+- `textContent`는 HTML태그를 모두 제거하고 순수한 텍스트 데이터만 제공하며, `innerHTML`은 HTML태그를 그대로 제공 
+- `innerHTML`을 통해 HTML태그를 수정하면 DOM이 그에 맞게 변경됨 
+```javascript
+const para1 = document.getElementsByTagName('p')[0];
+para1.textContent;      // "This is a simple HTML file."
+para1.innerHTML;        // "This is a simple HTML file."
+para1.textContent = "Modified HTML file";
+para1.innerHTML = "Modified HTML file";
+```
+- `textContent`나 `innerHTML`를 조작하는 것은 파괴적인 작업 
+- 이 프로퍼티들을 수정하면 원래 컨텐츠는 전부 사라지니 주의 필요 
+
+## 새 DOM 요소 만들기 
+- `document.createElement`를 통해 새 노드를 만들 수 있음 
+- 이 함수는 새 노드를 만들지만 DOM에 추가하지는 않음
+```javascript
+const p1 = document.createElement('p');
+const p2 = document.createElement('p');
+p1.textContent = "I was created dynamically!";
+p2.textContent = "I was also created dynamically!";
+```
+- 새로 만든 요소를 DOM에 추가할 때는 `insertBefore`와 `appendChild`를 사용 
+```javascript
+const parent = document.getElementById('content');
+const firstChild = parent.childNodes[0];
+parent.insertBefore(p1, firstChild);
+parent.appendChild(p2);
+```
+- `insertBefore`는 매개변수를 두 개 받음. 첫 번째 매개변수는 삽입할 요소이고, 두 번째 매개변수는 삽입할 위치를 정하는 요소
+- `appendChild`는 항상 마지막 자식 요소로 추가 
+
+## 요소 스타일링
+- 요소의 스타일을 바꾸고 싶으면 CSS 클래스를 이용 
+- `unique`란 단어가 들어있는 문단을 모두 하이라이트로 만드는 예제 
+```css
+.highlight {
+    background: #ff0;
+    font-style: italic;
+}
+```
+- `<p>`태그를 모두 찾은 다음 `unique`가 들어있다면 highlight 클래스를 추가
+- 모든 요소에는 클래스를 나열하는 `classList` 프로퍼티가 있음 
+- `classList`의 `add`메서드로 클래스를 추가할 수 있음 
+- `highlightParas`함수를 만드는 예제 
+```javascript
+function highlightParas(containing) {
+    if(typeof containing === 'string')
+        containing = new RegExp(`\\b${containing}\\b`, 'i');
+    const paras = document.getElementsByTagName('p');
+    console.log(paras);
+    for(let p of paras) {
+        if(!containing.test(p.textContent)) continue;
+        p.classList.add('highlight');
+    }
+}
+highlightParas('unique');
+```
+- 클래스를 제거할 때는 `classList.remove`를 사용 
+```javascript
+function removeParaHighlights() {
+    const paras = document.querySelectorAll('p.highlight');
+    for(let p of paras) {
+        p.classList.remove('highlight');
+    }
+}
+```
+
+## 데이터 속성 
+- HTML5에서는 데이터(data-)속성을 도입 
+- 이 속성으로 HTML요소에 임의의 데이터를 추가할 수 있음 
+- 브라우저 
