@@ -182,4 +182,190 @@ function removeParaHighlights() {
 ## 데이터 속성 
 - HTML5에서는 데이터(data-)속성을 도입 
 - 이 속성으로 HTML요소에 임의의 데이터를 추가할 수 있음 
-- 브라우저 
+- 브라우저는 이 데이터를 완전히 무시하므로 자바스크립트에서 쉽게 요소에 관한 정보를 읽거나 수정할 수 있음
+- HTML을 수정해서 버튼 두 개를 추가
+```html
+<button data-action="highlight" data-containing="unique">
+    Highlight paragraphs containing "unique"
+</button>
+<button data-action="removeHighlights">
+    Remove highlights
+</button>
+```
+- 데이터 속성의 이름은 무엇이든 상관없음
+- `document.querySelectorAll`을 사용해 `action`데이터 속성에 "highlight"가 들어있는 요소를 모두 찾을 수 있음 
+```javascript
+const highlightActions = document.querySelectorAll('[data-action="highlight"]');
+```
+- 대괄호 문법을 쓰면 어떤 속성으로든 찾을 수 있음 
+- 버튼이 하나만 있으므로 `querySelector`를 사용해도 됨 
+- `highlightActions`의 요소를 보면 `dataset`프로퍼티가 있는걸 알 수 있음 
+```javascript
+highlightActions[0].dataset;
+// DOMStringMap { containing: "unique", action: "highlight" }
+```
+- DOM API는 데이터 속성의 값을 문자열 형태로 저장하므로 객체 데이터는 저장할 수 없음
+- 제이쿼리에서는 데이터 속성의 기능을 확장하는 인터페이스를 만들어서 객체도 데이터 속성에 저장할 수 있게 만들었음 (19장 참조)
+- 자바스크립트에서 데이터 속성을 수정하거나 추가하는 것도 가능
+```javascript
+highlightActions[0].dataset.containing = "giraffe";
+highlightActions[0].dataset.caseSensitive = "true";
+```
+
+## 이벤트
+- 꼭 알아야 하는 이벤트만 정리
+- `click`이벤트를 통해 하이라이트 버튼과  `highlightParas`함수를 연결 
+```javascript
+const highlightActions = document.querySelectorAll('[data-action="highlight"]');
+for(let a of highlightActions) {
+    a.addEventListener('click', evt => {
+        evt.preventDefault();
+        highlightParas(a.dataset.containing);
+    });
+}
+
+const removeHighlightActions = document.querySelectorAll('[data-aciton="removeHighlihgts"]');
+for(let a of removeHighlightActions) {
+    a.addEventListener('click', evt => {
+        evt.preventDefault();
+        removeParaHighlights();
+    });
+}
+```
+- 모든 요소에는 `addEventListener`라는 메소드가 있음 
+- 이 메소드를 통해 이벤트가 일어났을 때 호출할 함수를 지정할 수 있음 
+- 호출할 함수는 `Event`타입의 객체 하나만 매개변수로 받음 
+- 이벤트 객체에는 해당 이벤트에 관한 정보가 모두 포함(clientX, clientY, target등)
+- 이벤트 모델은 이벤트 하나에 여러가지 함수(핸들러)를 연결할 수 있도록 설계
+- 기본 핸들러가 지정된 이벤트도 많아 기본 핸들러 동작을 막고 다른 동작으로 변경할 수 있음 
+- 예를 들어 `<a>`태그에서 클릭이벤트는 링크호출을 하게 되어 있는데 이를 막고(preventDefault()) 다른 동작을 하게 할 수 있음 
+
+#### 이벤트 버블링과 캡처링
+- HTML은 계층적이기 때문에 이벤트를 한 곳에서만 처리해야 하는 것은 아님
+- 버튼이벤트 처리시 해당 버튼의 부모나 부모의 부모에서 처리해도 됨 
+- 여러 요소에서 이벤트 처리할 수 있다면 그 이벤트에 응답하는 기회는 어떤 순서로 주어지는가?
+- 확인 방법 첫 번째로 가장 먼 조상부터 시작하는 방법인 캡처링이 있음 
+- HTML에서 버튼은 `<div id="content">`에 들어있고 `<div id="content">`는 `<body>`에 들어있다고 하면 `<body>`도 버튼에서 일어난 이벤트를 `캡처`할 수 있음 
+- 다른 방법은 이벤트가 일어난 요소에서 거슬로 올라가는 방법인 버블링이 있음 
+- HTML5 이벤트 모델에서는 두 방법을 모두 지원하기 위해 먼저 해당 요소의 가장 먼 조상에서 시작해 해당 요소까지 내려온 다음, 다시 해당 요소에서 시작해 가장 먼 조상까지 거슬러 올라가는 방법을 택함 
+- 이벤트 핸들러에는 다른 핸들러가 어떻게 호출될지 영향을 주는 세 가지 방법이 있음 
+- 첫 번째는 가장 많이 쓰이느 `preventDefault`. 이벤트를 취소함.
+- 두 번째는 `stopPropagation`. 이벤트를 현재 요소에서 끝내고 더이상 전달되지 않게 막음 
+- 즉, 해당 요소에 연결된 이벤트 핸들러는 동작하지만 다른 요소에 연결된 이벤트 핸들러는 동작하지 않음 
+- 세 번째는 `stopImmediatePropagation` 다른 이벤트 핸들러, 심지어 현재 요소에 연결된 이벤트 핸들러도 동작하지 않게 막음 
+```html
+<!doctype html>
+<html>
+    <head>
+        <title>Event Propagation</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div>
+            <button>Click Me!</button>
+        </div>
+        <script>
+            // 이벤트 핸들러를 만들어 반환 
+            function logEvent(handlerName, type, cancel, stop, stopImmediate) {
+                // 실제 이벤트 핸들러 
+                return function(evt) {
+                    if(cancel) evt.preventDefault();
+                    if(stop) evt.stopPropagation();
+                    if(stopImmediate) evt.stopImmediatePropagation();
+                    console.log(`${type}: ${handlerName}` +
+                        (evt.defaultPrevented ? '(canceled)' : ''));
+                }
+            }
+            // 이벤트 핸들러를 요소에 추가 
+            function addEventLogger(elt, type, action) {
+                const capture = type === 'capture';
+                elt.addEventListener('click', 
+                    logEvent(elt.tagName, type, action === 'cancel', action === 'stop', action === 'stop!'), capture);
+            }
+            const body = document.querySelector('body');
+            const div = document.querySelector('div');
+            const button = document.querySelector('button');
+            addEventLogger(body, 'capture');
+            addEventLogger(body, 'bubble');
+            addEventLogger(div, 'capture');
+            addEventLogger(div, 'bubble');
+            addEventLogger(button, 'capture');
+            addEventLogger(button, 'bubble');
+        </script>
+    </body>
+</html>
+```
+- 버튼을 클릭하면 다음과 같은 내용이 출력 
+```
+capture: BODY
+capture: DIV
+capture: BUTTON
+bubble: BUTTON
+bubble: DIV
+bubble: BODY
+```
+- 캡처링이 먼저 시작되고 그 후에 버블링이 이어짐
+- 버튼에서는 핸들러가 캡처링 다음 버블링이라는 일반적인 순서를 무시하고 추가된 순서대로 실행됨 
+- 앞의 예제에서 버튼에 핸들러를 추가한 순서를 반대로 하면 콘솔에도 반대로 기록 됨 
+- 이벤트를 취소하는 예제를 구현하기 위해 다음과 같이 수정 
+```javascript
+addEventLogger(body, 'capture');
+addEventLogger(body, 'bubble');
+addEventLogger(div, 'capture', 'cancel');
+addEventLogger(div, 'bubble');
+addEventLogger(button, 'capture');
+addEventLogger(button, 'bubble');
+```
+- 이벤트 전달은 계속 되지만, 이벤트가 취소됐다고 기록
+```
+capture: BODY
+capture: DIV (canceled)
+capture: BUTTON (canceled)
+bubble: BUTTON (canceled)
+bubble: DIV (canceled)
+bubble: BODY (canceled)
+```
+- 버튼의 캡처단계에서 이벤트 전달을 중지해보면 
+```javascript
+addEventLogger(body, 'capture');
+addEventLogger(body, 'bubble');
+addEventLogger(div, 'capture', 'cancel');
+addEventLogger(div, 'bubble');
+addEventLogger(button, 'capture', 'stop');
+addEventLogger(button, 'bubble');
+```
+- 버튼 요소에서 이벤트 전달이 멈춤 
+- 캡처링까지 진행하고 멈추게 했지만, 버튼의 버블링 이벤트는 여전히 발생 
+- 하지만 `<div>`와 `<body>`요소는 이벤트 버블링을 받지 못함 
+```
+capture: BODY
+capture: DIV (canceled)
+capture: BUTTON (canceled)
+bubble: BUTTON (canceled)
+```
+- 마지막으로 버튼의 캡처 단계에서 즉시 멈추게 변경 
+```javascript
+addEventLogger(body, 'capture');
+addEventLogger(body, 'bubble');
+addEventLogger(div, 'capture', 'cancel');
+addEventLogger(div, 'bubble');
+addEventLogger(button, 'capture', 'stop!');
+addEventLogger(button, 'bubble');
+```
+- 버튼의 캡처 단계에서 이벤트 전달이 완전히 멈춤 
+```
+capture: BODY
+capture: DIV (canceled)
+capture: BUTTON (canceled)
+```
+
+- 참고사항
+```
+addEventLitener는 이벤트를 추가하는 구식 방법인 on프로퍼티를 대체할 목적으로 만들어 짐.
+예전에는 elt에 클릭 핸들러를 추가할 때 elt.onclick = function(evt) { /* handler */ }같은 문법을 사용했는 데 이런 문법의 가장 큰 단점은 이벤트에 핸들러 하나만 등록할 수 있다는 점 
+``` 
+```
+제이쿼리 이벤트 리스너에서 명시적으로 false를 반환하는 것은 stopPropagation을 호출하는 것과 동등한 효과가 있음. 단 이것은 제이쿼리의 단축 문법이며 DOM API에서는 동작하지 않음 
+```
+
+#### 이벤트 카테고리 
