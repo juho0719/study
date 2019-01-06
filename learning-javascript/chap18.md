@@ -369,3 +369,127 @@ addEventLitener는 이벤트를 추가하는 구식 방법인 on프로퍼티를 
 ```
 
 #### 이벤트 카테고리 
+
+`드래그 이벤트`
+- dragstart, drag, dragend, rop 등의 이벤트를 통해 드래그 앤 드랍 인터페이스를 만들 수 있음 
+
+`포커스 이벤트`
+- 사용자가 폼 필드 같은 편집 가능한 요소를 조작하려 할 때 반응 
+- 필드에 들어갈 때 focus이벤트, 필드에서 나올 때 blur이벤트, 필드의 내용르 바꿀 때 change이벤트
+
+`폼 이벤트`
+- 사용자가 전송 버튼을 클릭하거나, 적절한 위치에서 엔터를 눌러 폼을 전송하면 submit이벤트가 발생 
+
+`입력 장치 이벤트`
+- 마우스 이벤트에는 mousedown, move, mouseup, mouseenter, mouseleave, mouseover, mousewheel 이벤트가 있음 
+- 키보드에는 keydown, keypress, keyup이 있음 
+- 터치 장치의 터치 이벤트는 마우스 이벤트보다 우선
+
+`미디어 이벤트`
+- HTML5 비디오, 오디오 관련 이벤트로, pause, play등이 있음 
+
+`진행(progress) 이벤트`
+- 브라우저가 컨텐츠를 불러오는 과정에서 발생 
+- 가장 널리 쓰이는 것은 load이벤트. 브라우저가 요소와 관련된 자원을 모두 불러왔을 때 발생
+- 자원을 사용할 수 없을 때, 예를 들어 이미지 링크가 깨졌을 때 error이벤트를 통해 적절히 대응 가능 
+
+`터치 이벤트`
+- 이벤트의 touches프로퍼티를 통해 동시 터치를 지원하고, 핀지, 스와이프 같은 제스처를 비롯해 세밀한 터치 처리를 가능하게 함 
+
+## Ajax
+- Ajax를 통해 서버와 비동기적으로 통신하면 페이지 전체를 새로 고칠 필요 없이 서버에서 데이터를 받아올 수 있음 
+- Ajax를 사용하려면 서버가 필요. node.js를 통해 간단한 서버를 만들어 Ajax서비스를 제공하도록 함
+- Server.js 파일을 다음과 같이 생성 
+```javascript
+const http = require('http');
+
+const server = http.createServer(function(req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.end(JSON.stringify({
+        platform: process.platform,
+        nodeVersion: process.version,
+        uptime: Math.round(process.uptime()),
+    }));
+});
+
+const port = 7070;
+server.listen(port, function() {
+    console.log(`Ajax server started on port ${port}`);
+});
+```
+- 참고사항 
+```
+테스트 진행을 원할하게 하기 위해 CORS체크를 비활성화하고 함 
+res.setHeader('Access-Control-Allow-Origin', '*');
+```
+- 다음 명령어로 서버 시작 
+```
+$ babel-node ajaxServer.js
+```
+- 문서 바디에 Ajax로 받아올 정보를 표시할 플레이스 홀더 생성 
+```html
+<div class="serverInfo">
+    Server is running on <span data-replace="platform">???</span>
+    with Node <span data-replace="nodeVersion">???</span>. It has
+    been up for <span data-replace="uptime">???</span> seconds.
+</div>
+```
+- 이제 HTML 파일 마지막, `</body>`태그의 바로 앞에 다음 스크립트를 추가 
+```html
+<script>
+    function refreshServerInfo() {
+        const req = new XMLHttpRequest();
+        req.addEventListener('load', function() {
+            // 값을 HTML에 삽입하는 것은 추후 진행
+            console.log(this.responseText);
+        });
+        req.open('GET', 'http://localhost:7070', true);
+        req.send();
+    }
+    refreshServerInfo();
+</script>
+```
+- 이 스크립트는 `XMLHttpRequest`객체를 만들고, Ajax호출이 성공했을 때 발생할 load이벤트에 대한 이벤트 리스너를 만듦 
+- 지금은 서버응답인 `this.responseText`를 콘솔에 출력하기만 함 
+- `open`을 호출해 요청을 실행
+
+- 다음 단계는 데이터를 HTML에 삽입하는 것. HTML을 만들 때 데이터 속성 `replace`가 있는 요소만 찾고, 그 요소의 컨텐츠를 반환받은 객체에서 뽑아낸 데이터로 교체할 수 있도록 만듦 
+- 서버에서 반환한 객체의 프로퍼티를 `Object.keys`를 통해 순회하고, `replace` 데이터 속성이 일치하는 요소가 있으면 그 컨텐츠로 교체 
+```javascript
+req.addEventListener('load', function() {
+    // this.responseText는 JSON이 들어있는 문자열 
+    // JSON.parse를 써서 문자열을 객체로 바꿈 
+    const data = JSON.parse(this.responseText);
+
+    // 이 예제에서는 클래스가 serverInfo인 <div>의 텍스트만 교체 
+    const serverInfo = document.querySelector('.serverInfo');
+
+    // 서버에서 반환한 객체를 키 기준으로 순회 
+    Object.keys(data).forEach(p => {
+        // 텍스트를 교체할 요소를 찾음 
+        const replacements = serverInfo.querySelectorAll(`[data-replace="${p}"]`);
+        // 서버에서 받은 값으로 텍스트를 교체 
+        for(let r of replacements) {
+            r.textContent = data[p];
+        }
+    });
+});
+```
+- `refreshServerInfo`는 함수이므로 언제든 호출 가능 
+- `uptime`필드는 서버가 얼마나 오래 열려 있었는지 나타내므로, 이런 정보는 주기적으로 업데이트해야 할 수 있음 
+```javascript
+setInterval(refreshServerInfo, 200);
+```
+- 참고사항 
+```
+페이지를 처음 불러올 때 <div class="serverInfo">안에 플레이스홀더 구실을 하는 물음표가 들어 있음.
+사용자의 인터넷 연결이 느리다면 서버에서 받아온 정보를 교체하기 전에 물음표가 잠시 보일 수 있음 
+이런 문제를 FOUC(flash of unstyled content)라 부르며, 이 외에도 몇가지 종류가 있음. 
+가장 좋은 해결책은 서버에서 각 필드의 초기값을 처음부터 만들어 보내면 됨.
+컨텐츠 업데이트가 끝나기 전에는 요소 전체를 숨기는 방법도 있음.
+```
+
+## 요약
+- 웹 개발자라면 세미 퓨어월이 쓴 `Learning Web App Development`(O'reilly, 2014)를 읽어보길 추천
+- CSSㅇ에 대해 더 알고 싶다면 에릭 마이어의 책을 보면 됨.
