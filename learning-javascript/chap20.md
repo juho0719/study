@@ -96,3 +96,4 @@ exports.quadraticFormula(a, b, c) {
 ```
 exports를 사용한 단축 문법은 객체를 내보낼 때만 사용
 ```
+
