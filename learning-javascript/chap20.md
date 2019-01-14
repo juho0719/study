@@ -153,5 +153,30 @@ exports를 사용한 단축 문법은 객체를 내보낼 때만 사용
 - 모듈은 대부분 객체를 내보내지만, 이따금 함수 하나만 내보낼 때도 있음 
 - 함수 하나만 내보내는 경우는 그 모듈의 함수를 즉시 호출하려는 의도로 만들 때가 대부분
 - 이런 경우 그 함수를 사용하려는 게 아니라 그 함수의 반환값을 사용하려는 의도임 
+- 이런 패턴은 모듈을 일부 커스터마이즈 하거나, 주변 컨텍스트에서 정보를 얻어야 할 때 주로 사용
+- 실제 쓰이는 npm 패키지 `debug`를 보면 `debug`를 임포트할 때는 문자열 매개변수를 하나 넘김 
+- 이 문자열은 로그 앞에 접두사로 써서 프로그램의 다른 부분과 구별하는 역할 
+```javascript
+const debug = require('debug')('main');     // 모듈이 반환하는 함수를 즉시 호출
+debug("starting");      // 디버그가 활성화 되어 있으면 "main starting +0ms"라는 로그를 남김 
+```
+- TIP
+```
+debug 모듈로 디버그를 할 때는 환경 변수 DEBUG를 수정. 위 예제라면 DEBUG=main으로 세팅했을 것임.
+DEBUG=*를 써서 디버그 메시지를 모두 로그에 기록하게 할 수도 있음 
+```
+- 위 예제를 보면 `debug`모듈이 반환한 것을 즉시 호출했으므로 `debug`모듈이 함수를 반환한다는 것을 알 수 있고, 반환값인 함수 역시 함수를 반환하며 최종적으로 반환된 함수는 첫 번째 함수에 넘긴 문자열을 '기억'
+- 최종적으로 반환된 함수는 첫 번째 함수에 넘긴 문자열을 '기억'한다는 걸 알 수 있음 
+- `debug`모듈을 직접 만들었다면?
+```javascript
+let lastMessage;
 
-
+module.exports = function(prefix) {
+    return function(message) {
+        const now = Date.now();
+        const sinceLastMessage = now - (lastMessage || now);
+        console.log(`${prefix}${message} + ${sinceLastMessage}ms`);
+        lastMessage = now;
+    }
+}
+```
