@@ -180,3 +180,42 @@ module.exports = function(prefix) {
     }
 }
 ```
+- 이 모듈이 내보내는 함수는 즉시 호출해서 `prefix`값으로 모듈 자체를 커스터마이즈 하도록 설계 
+- `lastMessage`는 마지막 메시지를 기록했을 때의 타임스탬프. 이 값을 사용하여 메시지 사이 시간을 계산할 수 있음 
+- 모듈을 여러번 임포트 하면 어떻게 되는가?
+```javascript
+const debug1 = require('./debug')('one');
+const debug2 = require('./debug')('two');
+
+debug1('started first debugger!');
+debug2('started second debugger!');
+
+setTimeout(function() {
+    debug1('after some time...');
+    debug2('what happens?');
+}, 200);
+```
+- 다음과 같은 결과를 볼 거라 기대하지만?
+```
+one started first debugger! +0ms
+two started second debugger! +0ms
+one after some time... +200ms
+two what happens? +200ms
+```
+- 실제 보이는 화면은?
+```
+one started first debugger! +0ms
+two started second debugger! +0ms
+one after some time... +200ms
+two what happens? +0ms
+```
+- 노드는 노드 앱을 실행할 때 어떤 모듈이든 단 한 번만 임포트 
+- 따라서 `debug`모듈을 두번 임포트하더라도, 노드는 해당 모듈을 이미 임포트했음을 인식하고 다시 임포트 하지 않음 
+- TIP
+```
+npm의 debug 모듈 역시 우리가 만든 모듈과 비슷한 방법으로 동작 
+독립적인 디버그 로그를 여러 개 기록하고 싶다면, lastMessage 타임스탬프를 모듈이 반환하는 함수로 옮기면 됨 
+이렇게 하면 각 함수마다 서로 다른 타임스탬프를 유지하므로 디버그 로그 역시 독립적으로 운영 가능 
+```
+
+## 파일시스템 접근 
