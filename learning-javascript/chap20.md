@@ -219,3 +219,94 @@ npm의 debug 모듈 역시 우리가 만든 모듈과 비슷한 방법으로 동
 ```
 
 ## 파일시스템 접근 
+- 프로젝트 루트를 `/home/juho/fs`와 같이 임의로 정함
+- 파일을 만들 때는 `fs.writeFile`을 사용 
+- 프로젝트 루트에 다음과 같이 `write.js`파일을 생성 
+```javascript
+const fs = require('fs');
+
+fs.writeFile('hello.txt', 'hello from Node!', function(err) {
+    if(err) return console.log('Error writing to file.');
+});
+```
+- `write.js`파일을 저장한 디렉토리에 쓰기 권한이 있고, 읽기 전용 `hello.txt`파일이 존재하지 않으면 `hello.txt`파일이 생성됨 
+- 노드 애플리케이션을 실행하면 해당 애플리케이션은 자신이 실행된 작업 디렉토리를 `__dirname`변수로 보관 
+- 이 변수를 사용해 `write.js`파일을 다음과 같이 고칠 수 있음 
+```javascript
+
+const fs = require('fs');
+fs.writeFile(__dirname + '/hello.txt', 
+        'hello from Node!', function(err) {
+    if(err) return console.log('Error writing to file.');
+});
+```
+- 이제 `write.js`는 항상 `/home/juho/fs`에 `hello.txt`를 생성함 
+- 문자열 병합으로 `__dirname`과 파일 이름을 합쳐서 파일 경로를 얻으면 운영체제에 따라 호환되지 않을 수도 있음 
+- 이 예제에서 사용한 방법은 윈도우에서 동작하지 않음 
+- 노드의 `path`모듈에는 운영체제 독립적인 경로 이름 유틸리티가 있음 
+```javascript
+const fs = require('fs');
+const path = require('path');
+
+fs.writeFile(path.join(__dirname, 'hello.txt'), function(err, data) {
+    if(err) return console.error('Error reading file.');
+    console.log('Read file contents:');
+    console.log(data);
+});
+```
+- 실행결과는?
+```
+Read file contents:
+<buffer 68 65 6c 6f 20 66 72 6d 4e 64 21>
+```
+- 이 16진수 코드를 ASCII/Unicode로 바꾸면 `hello from Node!`이긴 함
+- `fs.readFile`에 인코딩 정보를 제공하지 않으면 `fs.readFile`은 가공되지 않은 바이너리 데이터인 버퍼를 반환 
+- `read.js`에 UTF-8인코딩을 지정하면 원하는 문자로 나옴 
+```javascript
+const fs = require('fs');
+const path = require('path');
+
+fs.writeFile(path.join(__dirname, 'hello.txt'), 
+        { encoding: 'utf8' }, function(err, data) {
+    if(err) return console.error('Error reading file.');
+    console.log('Read file contents:');
+    console.log(data);
+});
+```
+- 파일 관련 함수에는 모두 동기적으로 작업하는 짝이 있으며, 이들의 이름은 `Sync`로 끝남 
+- `write.js`
+```javascript
+fs.writeFileSync(path.join(__dirname, 'hello.txt'), 'hello from Node!');
+```
+- `read.js`
+```javascript
+const data = fs.readFileSync(path.join(__dirname, 'hello.txt'),
+    { encoding: 'utf8' });
+```
+- 동기적인 함수에서는 `try/catch`를 사용 
+```javascript
+try {
+    fs.writeFileSync(path.join(__dirname, 'hello.txt'), 'hello from Node!');
+} catch(err) {
+    console.error('Error writing file.');
+}
+```
+- CAUTION
+```
+웹 서버나 네트워크 애플리케이션을 만들 때는 항상 비동기적 함수를 써야 함
+```
+- 디렉토리에 어떤 파일이 있는 지 보기위해 `fs.readdir`을 찾고 왔어 
+- `ls.js`파일 생성
+```javascript
+const fs = require('fs');
+
+fs.readdir(__dirname, function(err, files) {
+    if(err) return console.error('Unable to read directory contents');
+    console.log(`Contents of ${__dirname}:`);
+    console.log(files.map(f => '\t' + f).join('\n'));
+})
+```
+- `fs` 모듈에는 여러가지 함수들이 있음  
+- 파일 지울 때 `fs.unlink`, 파일을 옮기거나 이름을 바꿀때 `fs.rename`, 파일이나 디렉토리 정보를 얻을 때 `fs.stat`
+
+## process
