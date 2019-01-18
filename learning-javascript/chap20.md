@@ -381,3 +381,152 @@ console.log(`Current directory: ${process.cwd()}`);
 process.chdir(__dirname);
 console.log(`New current directory: ${process.cwd()}`);
 ```
+
+## 운영체제
+- 프로그램을 실행하는 컴퓨터의 운영체제 정보를 제공 
+```javascript
+const os = require('os');
+
+console.log("Hostname: "+os.hostname());
+console.log("OS type: "+os.type());
+console.log("OS platform: "+os.platform());
+console.log("OS release: "+os.release());
+console.log("OS uptime: "+(os.uptime()/60/60/24).toFixed(1)+" days");
+console.log("CPU architecture: "+os.arch());
+console.log("Number of CPUs: "+os.cpus().length);
+console.log("Total memory: "+(os.totalmem()/1e6).toFixed(1)+ " MB");
+console.log("Free memory: "+(os.freemem()/1e6).toFixed(1)+" MB");
+```
+
+## 자식 프로세스 
+- `child_process` 모듈은 애플리케이션에서 다른 프로그램을 실행할 때 사용 
+- `child_process`에서 제공하는 주요 함수는 `exec`, `execFile`, `fork`
+- `fs`와 마찬가지로 동기적 버전 `execSync`, `execFileSync`, `forkSync` 존재
+- `exec`는 쉘을 호출하므로 쉘에서 호출할 수 있는 무엇이든 실행 가능 
+- `execFile`은 쉘을 통하지 않고 실행파일을 직접 실행
+- `fork`는 다른 노드 스크립트를 실행할 때 사용 
+- NOTE
+```
+fork는 별도의 노드 엔진을 호출하므로 소모하는 자원 면에서는 exec와 같음. 하지만 fork를 사용하면 프로세스와의 통신이 가능해짐 
+```
+- 아래 예제는 `dir`명령어를 통해 디렉토리 내용을 출력함
+```javascript
+const exec = require('child_process').exec;
+
+exec('dir', function(err, stdout, stderr) {
+    if(err) return console.error('Error executing "dir"');
+    stdout = stdout.toString();     // Buffer를 문자열로 변환 
+    console.log(stdout);
+    stderr = stderr.toString();
+    if(stderr != '') {
+        console.error('error:');
+        console.errlr(stderr);
+    }
+});
+```
+- `exec`는 쉘을 호출하므로 `dir`실행 파일이 존재하는 경로를 따로 지정할 필요는 없음 
+- 일반적으로 시스템 쉘에서 바로 실행할 수 없고, 전체 경로를 써야 하는 외부 프로그램을 실행한다면 `exec`도 전체 경로를 써주어야 함. 
+- 호출되는 콜백은 Buffer 두개를 받음 
+- 하나는 일반 출력 결과인 `stdout`, 다른 하나는 에러 출력 결과인 `stderr`
+- `exec`는 옵션 매개변수로 `options`객체를 받을 수 있음
+- 이 객체를 통해 작업 디렉토리, 환경 변수 등의 정보를 넘길 수 있음 
+- NOTE
+```
+exec를 임포트한 부분을 보면 child_process.exec의 별칭으로 exec를 지정하지 않고 바로 사용했음
+```
+
+## 스트림 
+- 스트림은 스트림 형태의 데이터를 다루는 객체 
+- 스트림에는 읽기(read), 쓰기(write), 이중(duplex)가 있음 
+- 스트림의 예로 사용자의 타이핑, 클라이언트와 통신하는 웹 서비스 등이 있음 
+- 파일 스트림을 통해 읽기와 쓰기 스트림을 만들고, 스트림을 파이프로 연결하는 방법을 알아보면
+- 먼저 쓰기 스트림을 만듦
+```javascript
+const fs = require('fs');
+const ws = fs.createWriteStream('stream.txt', { encoding: 'utf8' });
+ws.write('line 1\n');
+ws.write('line 2\n');
+ws.end();
+```
+- TIP
+```
+end 메소드는 옵션으로 데이터 매개변수를 받을 수 있으며, 이 매개변수는 write를 호출하는 것과 동등 
+따라서 데이터를 단 한번만 보낸다면, end 한번만 호출해도 데이터를 보낼 수 있음 
+```
+- `end`를 호출해서 쓰기 스트림(ws)을 종료하기 전까지는 `write`메소드를 통해 스트림에 쓸 수 있음 
+- `end`를 호출한 다음 `write`를 호출하면 에러 
+- `end`를 호출하기 전에 `write`를 여러번 호출할 수 있으므로, 시간을 두고데이터를 보낼 때는 쓰기 스트림이 이상적 
+- 읽기 스트림을 만들어 데이터를 읽음 
+```javascript
+const rs = fs.createReadStream('stream.txt', { encoding: 'utf8' });
+rs.on('data', function(data) {
+    console.log('>> data: ' + data.replace('\n', '\\n'));
+});
+rs.on('end', function(data) {
+    console.log('>> end');
+});
+```
+- 읽기 스트림과 쓰기 스트림을 파이프로 연결하면 파일 컨텐츠를 복사하는 효과가 있음 
+```javascript
+const rs = fs.createReadStream('stream.txt');
+const ws = fs.createWriteSteam('stream_copy.txt');
+rs.pipe(ws);
+```
+- `rs`는 `stream.txt`의 데이터를 `ws`에 파이프로 연결하고, `ws`는 그 데이터를 그대로 `stream_copy.txt`에 기록 (인코딩은 데이터를 해석할 때만 필요)
+- 파이프는 데이터를 옮길 때도 자주 쓰임
+- 예를 들어 파일 컨텐츠를 웹 서버의 응답 부분에 파이프로 연결하거나 압축된 데이터를 압축 해제 엔진에 파이프로 연결하고 압축 해제 엔진은 다시 그 데이터를 파일 기록하는 부분에 파이프로 연결하는 것도 가능
+
+## 웹 서버
+- 노드의 원래 목적은 웹 서버를 만드는 것 
+- `http` 모듈에는 기본적인 웹 서버를 만드는 `createServer` 메소드가 있음 
+- 들어오는 요청을 처리할 콜백 함수만 만들면 됨 
+- 서버를 시작할 때는 `listen` 메소드를 호출하면서 포트를 지정 
+```javascript
+const http = requrie('http');
+
+const server = http.createServer(function(req, res) {
+    console.log(`${req.method} ${req.url}`);
+    res.end('Hello world!');
+});
+
+const port = 8080;
+server.listen(port, function() {
+    // 서버가 시작 됐을 때 호출될 콜백을 넘길 수 있음 
+    console.log(`server started on port ${port}`);
+});
+```
+- NOTE
+```
+대부분의 운영체제는 보안상의 이유로 기본 HTTP 포트(80)을 막아놓음
+1024 미만의 포트를 사용하려면 항상 관리자 권한이 필요 
+개발과 테스트 목적으로는 보통 1024 이상의 포트를 사용하는 편
+```
+- 이 프로그램을 실행하고 브라우저에서 `http://localhost:8080`에 방문하면 Hello world!가 보임 
+- 터미널을 보면 모든 요청이 기록되어 있음 
+- 노드 웹 버서의 핵심은 들어오는 요청에 모두 응답하는 콜백 함수임 
+- 이 함수는 매개변수로 `IncomingMessage` 객체(보통 req라 함)와 `ServerResponse` 객체(보통 res라 함)를 받음
+- `IncomingMessage` 객체에는 요청받은 URL, 보낸 헤더, 바디에 들어있는 데이터등 HTTP 요청에 관한 모든 정보가 있음 
+- `ServerResponse`객체는 클라이언트(보통 브라우저)에 보낼 응답을 컨트롤하는 프로퍼티와 메소드가 있음 
+- `ServerResponse`객체는 쓰기 스트림 인터페이스이며 이를 통해 데이터를 클라이언트에 보냄 
+- `ServerResponse`객체가 쓰기 스트림이므로 파일을 보내기도 쉬움 
+- 파일 읽기 스트림을 만들어 HTTP 응답에 파이프로 연결하기만 하면 됨 
+- 예를 들어 `favicon.ico` 파일을 사용한다면 파비콘 요청을 가밎하고 파일을 바로 보낼 수 있음 
+```javascript
+const server = http.createServer(function(req, res) {
+    if(req.method === 'GET' && req.url === '/favicon.ico') {
+        const fs = require('fs');
+        fs.createReadStream('favicon.ico');
+        fs.pipe(res);       // end 대신 사용 가능 
+    } else {
+        console.log(`${req.method} ${req.url}`);
+        res.end('Heelo world!');
+    }
+});
+```
+- 노드로 웹사이트를 만들고 싶다면 [익스프레스](http://expressjs.com/)나 [Koa](http://koajs.com/)같은 프레임워크가 도움이 됨 
+- `Koa`는 널리 쓰이는 익스프레스 프레임워크를 계승한 것 같은 형태를 취함 
+- `Koa`가 익스프레스에 비해 좀 더 ES6중심으로 설계 (큰 차이는 없음)
+
+## 요약
+- 노드 개발에 흥미가 있다면 샐리 파워스(Shelley Powers)가 쓴 Learning Node를 참고
+
