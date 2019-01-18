@@ -310,3 +310,74 @@ fs.readdir(__dirname, function(err, files) {
 - 파일 지울 때 `fs.unlink`, 파일을 옮기거나 이름을 바꿀때 `fs.rename`, 파일이나 디렉토리 정보를 얻을 때 `fs.stat`
 
 ## process
+- 실행 중인 노드 프로그램은 모두 `process`에 접근할 수 있음 
+- 이 변수는 해당 프로그램에 관한 정보를 담고 있으며 실행 자체를 컨트롤할 수도 있음 
+- 예를 들어 애플리케이션이 치명적인 에러를 만나서 계속 실행하지 않는 편이 좋거나 더 실행해도 의미가 없는 상황이라면 (이런 에러를 fatal error라고 함) `process.exit`를 호출해 즉시 실행을 멈출 수 있음 
+- 숫자형 종료 코드(exit code)를 쓰면 프로그램이 성공적으로 종료 했는 지 에러가 있었는 지 외부 스크립트를 통해 알 수 있음 
+- 보통 에러 없이 끝냈을 땐 종료 코드 0을 사용
+- data 서브 디렉토리에 있는 `.txt`파일을 모두 처리하는 프로그램이 있다고 치고 data 서브 디렉토리에 `.txt`파일이 없다면?
+```javascript
+const fs = require('fs');
+
+fs.readdir('data', function(err, files) {
+    if(err) {
+        console.error("Fatal error: couldn't read data directory.");
+        process.exit(1);
+    }
+    const txtFiles = files.filter(f => /\.txt$/i.test(f));
+    if(txtFiles.length === 0) {
+        console.log("No .txt files to process.");
+        process.exit(0);
+    }
+    // .txt 파일 처리 
+});
+```
+- `process` 객체를 통해 프로그램에 전달된 명령줄 매개변수 배열에 접근할 수도 있음 
+- 노드 애플리케이션을 실행할 때 명령줄에서 매개변수를 지정할 수 있음 
+- 예를 들어 파일 이름을 매개변수로 넘기고 각 파일이 몇 행인지 출력한다고 하면?
+```
+$ node linecount.js file1.txt file2.txt file3.txt
+```
+- 명령줄 매개변수는 `process.argv` 배열에 저장 
+- `process.argv`를 보면 
+```
+[ 'node',
+  '/home/juho/linecount.js',
+  'file1.txt',
+  'file2.txt',
+  'file3.txt' ]
+```
+- 첫 번째 요소는 인터프리터, 두 번째 요소는 실행중인 프로그램의 전체 경로, 나머지는 매개변수
+- 추가 정보는 필요 없으므로 `Array.slice`를 써서 걸러 냄 
+```javascript
+const fs = require('fs');
+
+const filenames = process.argv.slice(2);
+
+let counts = filenames.map(f => {
+    try {
+        const data = fs.readFileSync(f, { encoding: 'utf8' });
+        return `${f}: ${data.split('\n').length}`;
+    } catch(err) {
+        return `${f}: couldn't read file`;
+    }
+});
+
+console.log(counts.join('\n'));
+```
+- `process.env`를 통해 환경 변수에 접근할 수도 있음 
+- 디버그 정보에 대한 기록 여부를 환경 변수로 컨트롤 한다라고 하면?(환경변수 DEBUG를 1로 설정하면 기록, 아니면 하지 않음)
+```javascript
+const debug = process.env.DEBUG === "1" ?
+    console.log :
+    function() {};
+
+debug("Visible only if environment variable DEBUG is set!");
+```
+- `process.cmd`에는 현재 작업 디렉토리가 저장, `process.chdir`로 현재 작업 디렉토리를 바꿀 수 있음
+- 현재 작업 디렉토리를 출력한 다음, 프로그램이 저장된 디렉토리로 현재 작업 디렉토리를 바꾸려면?
+```javascript
+console.log(`Current directory: ${process.cwd()}`);
+process.chdir(__dirname);
+console.log(`New current directory: ${process.cwd()}`);
+```
