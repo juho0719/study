@@ -130,3 +130,132 @@ arr.avg = function() { return this.sum()/this.length; }
 Object.defineProperty(arr, 'sum', { enumerable: false });
 Object.defineProperty(arr, 'avg', { enumerable: false });
 ```
+- 프로퍼티 하나를 문 하나로 완결하는 방법도 있음 
+```javascript
+const arr = [3, 1.5, 9, 2, 5.2];
+Object.defineProperty(arr, 'sum', {
+    value: function() { return this.reduce((a, x) => a+x); }
+    enumerable: false
+});
+Object.defineProperty(arr, 'avg', {
+    value: function() { return this.sum()/this.length; }
+    enumerable: false
+});
+```
+- `Object.defineProperties`도 있음. 
+- 이 메소드는 객체 프로퍼티 이름과 프로퍼티 정의를 서로 연결.
+- 바로 앞 예제를 `Object.defineProperties`로 변경하면 
+```javascript
+const arr = [3, 1.5, 9, 2, 5.2];
+Object.defineProperties(arr, {
+    sum: {
+        value: function() { return this.reduce((a, x) => a+x); }
+        enumerable: false
+    },
+    avg : {
+        value: function() { return this.sum()/this.length; }
+        enumerable: false
+    }
+});
+```
+
+## 객체 보호: 동결, 봉인, 확장 금지
+- 자바스크립트에는 객체를 보호해서 의도하지 않은 수정을 막고, 의도적인 공격은 더 어렵게 만드는 세가지 메커니즘이 있음
+- 동결(freezing), 봉인(sealing), 확장 금지(preventing extension)
+- 동결된 객체는 수정할 방법이 없음. 일단 객체를 동결하면 다음과 같은 작업이 불가능해짐 
+    - 프로퍼티 값 수정, 할당
+    - 프로퍼티 값 수정하는 메소드 호출 
+    - setter 호출 
+    - 새 프로퍼티 추가 
+    - 새 메소드 추가 
+    - 기존 프로퍼티나 메소드 설정 변경 
+- 객체를 동결할 때는 `Object.freeze`를 사용하고, 객체가 동결됐는지 확인할 때는 `Object.isFrozen`을 사용 
+- 회사, 버전, 빌드ID, 저작권 정보 등 앞으로 바뀔 일이 없는 프로그램에 대한 정보를 객체에 보관한다고 하면 
+```javascript
+const appInfo = {
+    company: 'White Knight Software, Inc.',
+    version: '1.3.5',
+    buildId: '0a995448-ead4-4a8b-b050-9c9083279ea2',
+    // 이함수는 getter이므로 동결한 상태에서도 계속 동작 
+    copyright() {
+        return `${new Date().getFullYear()}, ${this.company}`;
+    },
+};
+Object.freeze(appInfo);
+Object.isFrozen(appInfo);   // true
+
+appInfo.newProp = 'test';
+// TypeError: Can't add property newProp, object is not extensible
+
+delete appInfo.company;
+// TypeError: Cannot delete property 'company' of [object Object]
+
+appInfo.company = 'test';
+// TypeError: Cannot assign to read-only property 'company' of [object Object]
+
+Object.defineProperty(appInfo, 'company', { enumerable: false });
+// TypeError: Cannot redefine property: company
+```
+- 객체를 봉인하면 새 프로퍼티를 추가하거나 기존 프로퍼티를 변경, 삭제할 수 없음 
+- 클래스의 인스턴스를 사용하면서, 인스턴스의 프로퍼티를 수정하는 메소드는 동작하도록 할 때 봉인을 사용할 수 있음 
+- 객체를 봉인할 때는 `Object.seal`, 객체가 봉인됐는 지 확인할 때는 `Object.isSealed`를 사용 
+```javascript
+class Logger {
+    constructor(name) {
+        this.name = name;
+        this.log = [];
+    }
+    add(entry) {
+        this.log.push({
+            log: entry,
+            timestamp: Date.now(),
+        });
+    }
+}
+
+const log = new Logger("Captain's Log");
+Object.seal(log);
+Object.isSealed(log);   // true
+
+log.name = "Captain's Boring Log";          // OK
+log.add("Another boring day at sea...");    // OK
+
+log.newProp = 'test';
+// TypeError: Can't add property newProp, object is not extensible
+
+delete log.name;
+// TypeError: Cannot delete property 'name' of [object Object]
+
+Object.defineProperty(log, 'log', { enumerable: false });
+// TypeError: Cannot redefine property: log
+```
+- 마지막으로 가장 약한 제약인 확장 금지 
+- 확장 금지를 사용하면 객체에 새 프로퍼티를 추가하는 것만 금지 
+- 확장을 금지할 때는 `Object.preventExtensions`, 확장이 금지됐는 지 확인할 때는 `Object.isExtensible`을 사용 
+- 이번에도 `Logger` 클래스를 다시 사용하면 
+```javascript
+const log2 = new Logger("furst Mate's Log");
+Object.preventExtensions(log2);
+Object.isExtensible(log2);      // false
+
+log2.name = "First Mate's Boring Log";      // OK
+log2.add("Another boring day at sea...");   // OK
+
+log2.newProp = 'test';
+// TypeError: Can't add property newProp, object is not extensible
+
+log2.name = 'test';     // OK
+delete log2.name;       // OK
+Object.defineProperty(log2, 'log', { enumerable: false });  // OK
+```
+- 객체 보호 옵션 표
+
+|동작|일반 객체|동결 객체|봉인 객체|확장 금지 객체|
+|---|---|---|---|---|
+|프로퍼티 추가|허용됨|금지됨|금지됨|금지됨|
+|프로퍼티 읽기|허용됨|허용됨|허용됨|허용됨|
+|프로퍼티 값 설정|허용됨|금지됨|허용됨|허용됨|
+|프로퍼티 속성 변경|허용됨|금지됨|금지됨|허용됨|
+|프로퍼티 삭제|허용됨|금지됨|금지됨|허용됨|
+
+## 프락시
