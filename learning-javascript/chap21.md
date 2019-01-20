@@ -259,3 +259,101 @@ Object.defineProperty(log2, 'log', { enumerable: false });  // OK
 |프로퍼티 삭제|허용됨|금지됨|금지됨|허용됨|
 
 ## 프락시
+- 프락시(proxies)는 ES6에서 새로 추가된 메타프로그래밍 기능 
+- 메타프로그래밍이란 프로그램이 자기 자신을 수정하는 것 
+- 객체 프락시는 객체에 대한 작업을 가로채고, 필요하다면 작업 자체를 수정하는 기능 
+- 프로퍼티 접근을 수정하는 예제를 만들어 보면
+```javascript
+const coefficients = {
+    a: 1,
+    b: 2,
+    c: 5,
+};
+```
+- 이 객체의 프로퍼티가 수학의 계수(coefficient)라고 생각하면
+```javascript
+function evaluate(x, co) {
+    return co.a + co.b * x + co.c * Math.pow(x, 2);
+}
+```
+- 지금까지는 2차 방정식의 계수를 객체에 저장하고, x 값이 무엇이든 방정식을 계산할 수 있지만 계수 일부가 빠진 객체를 가지고 계산하려 한다면?
+```javascript
+const coefficients = {
+    a: 1,
+    c: 3,
+};
+evaluate(5, coefficients);      // NaN
+```
+- `cofficients.b`에 0을 할당하면 문제를 해결할 수 있지만, 프락시를 쓰는 방법이 더 나음 
+- 프락시는 객체를 대상으로 한 작업을 가로채므로, 정의되지 않은 프로퍼티는 항상 0을 반환하게 만들 수 있음 
+- coefficients 객체에 프락시를 만들면 
+```javascript
+const betterCoefficients = new Proxy(coefficients, {
+    get(target, key) {
+        return target[key] || 0;
+    },
+});
+```
+- CAUTION
+```
+프락시를 지원여부를 확인하고 사용해야 함. 파이어폭스 최신 버전은 프락시를 지원하므로 관련 코드를 파이어폭스에서 테스트 가능함 
+```
+- `Proxy` 생성자에 넘기는 첫 번째 매개변수는 타겟, 즉 프락시할 객체임 
+- 두 번째 매개변수는 가로챌 동작을 가리키는 핸들러 
+- 여기서는 프로퍼티에 접근하는 동작만 가로챗으며 `get`함수가 핸들러(프로퍼티 접근자인 get과 다름. 이 핸들러는 일반적인 프로퍼티나 접근자 프로퍼티 모두 동작)
+- `get`함수는 매개변수로 타겟, 프로퍼티 키(문자열 또는 심볼), 수신자(프락시 자체 또는 프락시에서 파생되는 것)을 받음 
+- 해당 키가 타겟에 있는지 확인하고 없으면 0을 반환 
+```
+betterCoefficients.a;           // 1
+betterCoefficients.b;           // 0
+betterCoefficients.c;           // 5
+betterCoefficients.d;           // 0
+betterCoefficients.anything;    // 0
+```
+- `coefficients`객체의 프락시에는 무한한 프로퍼티가 있고, 직접 정의한 프로퍼티를 제외하면 모두 값이 0인 것이나 마찬가지 
+- 키로 소문자 한 글자를 받았을 때만 프락시가 동작하게 할 수도 있음
+```javascript
+const betterCoefficients = new Proxy(coefficients, {
+    get(target, key) {
+        if(!/^[a-z]$/.test(key)) return target[key];
+        return target[key] || 0;
+    },
+});
+```
+- `target[key]`가 참 같은 값인지만 체크하지 않고, 키의 값이 숫자가 아닐 때는 항상 0을 반환하게 할 수도 있음 
+- 마찬가지로 프로퍼티에 값을 할당하려 할 때 `set`핸들러로 가로 챌 수 있음 
+- 객체에 위험한 프로퍼티가 있어서 한 단계를 더 거치지 않으면 값을 할당하거나 메서드를 호출할 수 없게 하려고 함 
+- 거쳐야 할 단계는 `allowDangerousOperations setter`
+- 이 값이 true일때만 위험한 프로퍼티에 접근할 수 있음 
+```javascript
+const cook = {
+    name: "Walt",
+    redPhosphorus: 100,     // 위험
+    water: 500,             // 안전
+};
+const protectedCook = new Proxy(cook, {
+    set(target, key, value) {
+        if(key === 'redPhosphorus') {
+            if(target.allowDangerousOperations)
+                return target.redPhosphorus = value;
+            else
+                return console.log("Too dangerous!");
+        }
+        // 다른 프로퍼티는 모두 안전 
+        target[key] = value;
+    },
+});
+
+protectedCook.water = 550;              // 550
+protectedCook.redPhosphorus = 150;      // Too dangerous!
+
+protectedCook.allowDangerousOperations = true;
+protectedCook.redPhosphorus = 150;      // 150
+```
+- 프락시에 대해 더 알고 싶다면 악셀 라우슈마이어(Axel Rauschmayer)의 ES6 프락시와 메타프로그래밍을 보자
+
+## 요약
+- 객체 프로퍼티가 어떻게 동작하며 그 동작 방식을 어떻게 수정할 수 있는 지 배움 
+- 객체를 부주의하게 수정할 수 없도록 보호하는 방법도 배움 
+- ES6에서 추가도니 프락시에 대해서도 배움 
+
