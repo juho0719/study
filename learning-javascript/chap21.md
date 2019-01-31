@@ -115,7 +115,7 @@ Object.defineProperty(obj, 'name', {
     value: 'Cynthia',
 });
 Object.defineProperty(obj, 'greet', {
-    value: function() { return 'Hello, my name is ${this.name}!`; }
+    value: function() { return `Hello, my name is ${this.name}!`; }
 });
 ```
 - `Object.defineProperty`는 배열 프로퍼티를 나열할 수 없게 만들 때 주로 사용 
