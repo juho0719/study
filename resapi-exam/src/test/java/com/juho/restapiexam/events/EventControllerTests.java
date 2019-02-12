@@ -90,7 +90,18 @@ public class EventControllerTests {
 
     @Test
     public void createEvent_Bad_Request_Empty_Input() throws Exception {
-        EventDto eventDto = EventDto.builder().build();
+        EventDto eventDto = EventDto.builder()
+                .name("spring")
+                .description("REST API Development with Spring")
+                .beginEnrollmentDateTime(LocalDateTime.of(2019, 1, 31, 13, 50, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2019, 1, 31, 23, 50, 0))
+                .beginEventDateTime(LocalDateTime.of(2019, 2, 1, 9, 0, 0))
+                .endEventDateTime(LocalDateTime.of(2019, 2, 1, 8, 0, 0))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("삼성역 2번출구")
+                .build();
 
         this.mockMvc.perform(post("/api/events")
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
