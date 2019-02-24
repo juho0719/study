@@ -1,4 +1,4 @@
 package com.juho.demospring51;
 
-public class TestBookRepository {
+public class TestBookRepository implements BookRepository {
 }
