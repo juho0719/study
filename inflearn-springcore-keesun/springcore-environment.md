@@ -29,4 +29,19 @@
   - & (and)
   - | (or)
   
-  
+#### Property
+- 다양한 방법으로 설정할 수 있는 설정 값
+- `Environment`의 역할은 프로퍼티 소스 설정 및 값 가져오기
+
+- Property 우선순위
+  - ServletConfig 매개변수
+  - ServletContext 매개변수
+  - JNDI(java:comp/env/);
+  - JVM 시스템 프로퍼티 (-Dkey=value)
+  - JVM 시스템 환경변수 (운영체제 환경변수)
+
+- @PropertySource
+  - `Environment`를 통해 프로퍼티를 추가하는 방법
+
+- 기본 프로퍼티 소스 지원(application.properties)
+- 프로파일까지 고려한 계층형 프로퍼티 우선 순위 제공
