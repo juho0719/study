@@ -42,6 +42,25 @@
 
 - @PropertySource
   - `Environment`를 통해 프로퍼티를 추가하는 방법
+  - app.properties
+  ```properties
+  app.name=hello
+  ```
+  - DemoAppRunner.java
+  ```java
+  @Component
+  @PropertySource("classpath:/app.properties")
+  public class DemoAppRunner implements ApplicationRunner {
+    @Autowired
+    EnvironmentCapable ctx;
+
+    @Override
+    public void run(ApplicationArguments args) {
+      Environment environment = ctx.getEnvironment();
+      System.out.println(environment.getProperty("app.name"));
+    }
+  }
+  ```
 
 - 기본 프로퍼티 소스 지원(application.properties)
 - 프로파일까지 고려한 계층형 프로퍼티 우선 순위 제공
