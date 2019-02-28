@@ -101,3 +101,4 @@ public void myEventListener(MyEvent event) {
     }
     ``` 
     - 반드시 main에 @EnableAsync를 선언해놔야 동작함
+
