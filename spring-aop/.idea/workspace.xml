@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="44653080-364d-4787-9da5-a2c50410a862" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/juho/springaop/AopTestAspect.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/juho/springaop/AopTestController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/juho/springaop/User.java" afterDir="false" />
-    </list>
+    <list default="true" id="44653080-364d-4787-9da5-a2c50410a862" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
