@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 public class TestConfiguration {
 
     @Bean
-    @public BookRepository bookRepository() {
+    public BookRepository bookRepository() {
         return new TestBookRepository();
     }
 }
