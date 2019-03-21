@@ -1,0 +1,48 @@
+# Intellij IDEA 
+.idea
+*.iws
+*.iml
+*.ipr
+
+# gradle
+.gradle
+/build/
+logs/
+
+# node
+node_modules
+*.log
+
+# OSX
+.DS_Store
+
+# Xcode
+build/
+!**/*.xcodeproj
+!**/*.pbxproj
+!**/*.xcworkspacedata
+!**/*.xcsettings
+!**/*.xcscheme
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode2v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Watchman
+.watchmanconfig
+
+# expo
+.expo
+__generated__
