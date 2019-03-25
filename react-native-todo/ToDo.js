@@ -28,8 +28,8 @@ export default class ToDo extends React.Component {
 					</TouchableOpacity>
 					{isEditing? (
 						<TextInput style={[
-							styles.input, 
 							styles.text, 
+							styles.input,
 							isCompleted? styles.completedText: styles.uncompletedText
 						]} 
 						value={todoValue} 
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
 		marginHorizontal: 10
 	},
 	input: {
-		marginVertical: 10,
-		width: width / 2
+		marginVertical: 15,
+		width: width / 2,
+		paddingBottom: 5
 	}
 });
