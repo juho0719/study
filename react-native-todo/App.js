@@ -18,13 +18,15 @@ const { height, width } = Dimensions.get("window");
 export default class App extends React.Component {
   state = {
     newToDo: "",
-    loadedToDos: false
+    loadedToDos: false,
+    toDos: {}
   };
   componentDidMount = () => {
     this._loadTodos();
   }
   render() {
-    const { newToDo, loadedToDos } = this.state;
+    const { newToDo, loadedToDos, toDos } = this.state;
+    console.log(toDos);
     if(!loadedToDos) {
       return <AppLoading />;
     }
@@ -41,11 +43,10 @@ export default class App extends React.Component {
             placeholderTextColor={"#999"}
             returnKeyType={"done"}
             autoCorrect={false}
-            onEndEditing={false}
             onSubmitEditing={this._addToDo}
           />
           <ScrollView contentContainerSytle={styles.toDos}>
-            <ToDo text={"Hello, Juho1, nice to meet you."} />
+            {Object.values(toDos).map(toDo => (<ToDo key={toDo.id} {...toDo} deleteToDo={this._deleteToDo} />))}
           </ScrollView>
         </View>
       </View>
@@ -77,8 +78,28 @@ export default class App extends React.Component {
             createdAt: Date.now()
           }
         };
-      })
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos: {
+            ...prevState.toDos,
+            ...newToDoObject
+          }
+        }
+        return { ...newState };
+      });
     }
+  };
+  _deleteToDo = (id) => {
+    this.setState(prevState => {
+      const toDos = prevState.toDos;
+      delete toDos[id];
+      const newState = {
+        ...prevState,
+        ...toDos
+      };
+      return { ...newState };
+    });
   }
 }
  
