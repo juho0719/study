@@ -2,12 +2,8 @@ import React, { Component } from 'react';
 import Movie from './Movie';
 import './App.css';
 
-const 
-
 class App extends Component {
   state = {
-    greeting: 'hello'  ,
-    
   }
 
   componentDidMount() {
@@ -32,16 +28,23 @@ class App extends Component {
           },
           {
             title: "Trainspotting",
-            poster: ""
+            poster: "https://is4-ssl.mzstatic.com/image/thumb/Video69/v4/e4/3d/a1/e43da14b-0354-62fb-304c-ad53f8ba9fa6/pr_source.lsr/268x0w.png"
           }
         ]
       })
     }, 5000)
   }
+
+  _renderMovies = () => {
+    const movies = this.state.movies.map((movie, index) => {
+      return <Movie title={movie.title} poster={movie.poster} key={index} />
+    })
+    return movies;
+  }
   render() {
     return (
       <div className="App">
-        Loading
+        {this.state.movies ? this._renderMovies() : 'Loading'}
       </div>
     );
   }
