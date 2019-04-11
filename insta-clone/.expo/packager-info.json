@@ -2,8 +2,9 @@
   "devToolsPort": 19002,
   "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 9906,
+  "packagerPid": 13468,
   "expoServerNgrokUrl": "https://yy-9vm.anonymous.insta-clone.exp.direct",
   "packagerNgrokUrl": "https://packager.yy-9vm.anonymous.insta-clone.exp.direct",
-  "ngrokPid": 9994
+  "ngrokPid": 13485,
+  "webpackServerPort": null
 }
