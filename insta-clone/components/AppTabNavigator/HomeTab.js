@@ -6,13 +6,39 @@ import CardComponent from '../CardComponent';
 export default class HomeTab extends Component {
 
 	state = {
-		feeds: []
+		feeds: [],
+		followings: []
+	}
+
+	fetchFollowing() {
+		const data = {
+			id: 2,
+			jsonrpc: "2.0",
+			method: "call",
+			params: [
+				"follow_api",
+				"get_following",
+				["anpigon", "", "blog", 10]
+			]
+		};
+		return fetch('https://api.steemit.com', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		})
+		.then(res => res.json())
+		.then(res => res.result.map(({following}) => following))
 	}
 
 	componentWillMount() {
 		this.fetchFeeds().then(feeds => {
 			this.setState({
 				feeds
+			})
+		});
+
+		this.fetchFollowing().then(followings => {
+			this.setState({
+				followings
 			})
 		});
 	}
@@ -62,27 +88,11 @@ export default class HomeTab extends Component {
 									paddingStart: 5,
 									paddingEnd: 5
 								}}>
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/newbijohn/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-								  source={{uri: 'https://steemitimages.com/u/jacobyu/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/blockchainstudio/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/gomdory/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/bbooaae/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/codingman/avatar'}} />
-								<Thumbnail 
-									style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
-									source={{uri: 'https://steemitimages.com/u/bukio/avatar'}} />
+								{
+									this.state.followings.map(following => <Thumbnail 
+										style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
+										source={{uri: `https://steemitimages.com/u/${following}/avatar`}} />)
+								}
 							</ScrollView>
 						</View>
 					</View>
