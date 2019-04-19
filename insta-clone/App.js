@@ -6,9 +6,9 @@ import AddMediaTab from './AppTabNavigator/AddMediaTab';
 import LikesTab from './AppTabNavigator/LikesTab';
 import ProfileTab from './AppTabNavigator/ProfileTab';
 
-const AppStackNavigator = createStackNavigator ({
-  Main: {
-    screen: MainScreen    // MainScreen 컴포넌트 네비게이터에 등록
+const HeaderStackNavigator = createStackNavigator ({
+  Header: {
+    screen: Header
   },
   BottomNavigator: AppTabNavigator
 });
