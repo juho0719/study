@@ -1,17 +1,10 @@
-import { createStackNavigator, createAppContainer } from 'react-navigation';
-import MainScreen from './components/MainScreen';
-import HomeTab from './AppTabNavigator/HomeTab';
-import SearchTab from './AppTabNavigator/SearchTab';
-import AddMediaTab from './AppTabNavigator/AddMediaTab';
-import LikesTab from './AppTabNavigator/LikesTab';
-import ProfileTab from './AppTabNavigator/ProfileTab';
-
-const HeaderStackNavigator = createStackNavigator ({
-  Header: {
-    screen: Header
-  },
-  BottomNavigator: AppTabNavigator
-});
+import { createAppContainer, createMaterialTopTabNavigator } from 'react-navigation';
+import { StyleSheet, Platform } from 'react-native';
+import HomeTab from './components/AppTabNavigator/HomeTab';
+import SearchTab from './components/AppTabNavigator/SearchTab';
+import AddMediaTab from './components/AppTabNavigator/AddMediaTab';
+import LikesTab from './components/AppTabNavigator/LikesTab';
+import ProfileTab from './components/AppTabNavigator/ProfileTab';
 
 // 하단 탭 네비게이터 생성
 const AppTabNavigator = createMaterialTopTabNavigator({
@@ -41,5 +34,5 @@ const AppTabNavigator = createMaterialTopTabNavigator({
 	}
 });
 
-export default createAppContainer(AppStackNavigator);
+export default createAppContainer(AppTabNavigator);
 
