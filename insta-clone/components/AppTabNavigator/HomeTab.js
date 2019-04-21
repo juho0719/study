@@ -9,12 +9,6 @@ export default class HomeTab extends Component {
 		feeds: [],
 		followings: []
 	}
-	// navigationOptions 코드 추가
-	static navigationOptions = {
-		headerLeft: <Icon name='ios-camera' style={{ paddingLeft: 10 }} />,
-		title: 'Instagram',
-		headerRight: <Icon name='ios-send' style={{ paddingRight: 10 }} />,
-	}
 
 	fetchFollowing() {
 		const data = {
