@@ -61,12 +61,6 @@ export default class HomeTab extends Component {
 		.then(res => res.result)
 	}
 
-	static navigationOptions = {
-		tabBarIcon: ({ tintColor }) => (
-			<Icon name='ios-home' style={{ color: tintColor }} />
-		)
-	}
-
 	render() {
 		return (
 			<Container style={style.container}>
@@ -89,7 +83,7 @@ export default class HomeTab extends Component {
 									paddingEnd: 5
 								}}>
 								{
-									this.state.followings.map(following => <Thumbnail 
+									this.state.followings.map((following, index) => <Thumbnail key={index} 
 										style={{ marginHorizontal: 5, borderColor: 'pink', borderWidth: 2 }}
 										source={{uri: `https://steemitimages.com/u/${following}/avatar`}} />)
 								}
@@ -97,7 +91,7 @@ export default class HomeTab extends Component {
 						</View>
 					</View>
 					{
-						this.state.feeds.map(feed => (<CardComponent data={feed} key={feed.url}/>))
+						this.state.feeds.map((feed, index) => (<CardComponent key={index} data={feed} />))
 					}
 				</Content>
 			</Container>
