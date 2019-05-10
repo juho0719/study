@@ -44,5 +44,26 @@ export class Post extends Component {
 				this.setState(() => ({ post }));
 			})
 	}
+	render() {
+		if(!this.state.post) {
+			return <Loader />;
+		}
+		return (
+			<div className="post">
+				<UserHeader date={this.state.post.date}
+										user={this.state.post.user} />
+				<Content post={this.state.post} />
+				<Image post={this.state.post} />
+				<Link link={this.state.post} />
+				<PostActionSection showComments={this.state.showComments} />
+				<Comments 
+					comments={this.state.comments}
+					show={this.state.showComments}
+					post={this.state.post}
+					user={this.state.post}
+				/>
+			</div>
+		);
+	}
 }
-
+export default Post;
