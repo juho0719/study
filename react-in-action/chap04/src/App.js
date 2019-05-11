@@ -49,7 +49,7 @@ class App extends Component {
           })
       });
   }
-  static PropTypes = {
+  static propTypes = {
     children: PropTypes.node
   };
   render() {
@@ -63,26 +63,26 @@ class App extends Component {
         ) : (
           <div className="home">
             <Welcome />
-          </div>
-          <div>
-            {this.state.posts.length && (
-              <div className="posts">
-                {this.state.posts.map(({ id }) => (
-                  <Post id={id} key={id} user={this.props.user} />
-                ))}
-              </div>
-            )}
-            <button className="block" onClick={this.getPosts}>
-              Load more posts
-            </button>
-          </div>
-          <div>
-            <Ad url="https://ifelse.io/book"
-                imageUrl="/static/assets/ads/ria.png"
-            />
-            <Ad url="https://ifelse.io/book"
-                imageUrl="/static/assets/ads/orly.png"
-            />
+            <div>
+              {this.state.posts.length && (
+                <div className="posts">
+                  {this.state.posts.map(({ id }) => (
+                    <Post id={id} key={id} user={this.props.user} />
+                  ))}
+                </div>
+              )}
+              <button className="block" onClick={this.getPosts}>
+                Load more posts
+              </button>
+            </div>
+            <div>
+              <Ad url="https://ifelse.io/book"
+                  imageUrl="/static/assets/ads/ria.png"
+              />
+              <Ad url="https://ifelse.io/book"
+                  imageUrl="/static/assets/ads/orly.png"
+              />
+            </div>
           </div>
          )}
       </div>
