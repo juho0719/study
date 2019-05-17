@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Filter from 'bad-words';
+
+const filter = new Filter();
 
 export default class CreatePost extends Component {
 	static propTypes = {
@@ -15,10 +18,11 @@ export default class CreatePost extends Component {
 	}
 
 	handlePostChange(e) {
-		 const content = e.target.value;
+		 const content = filter.clean(e.target.value);
 		 this.setState(() => {
 			 return {
-				 content
+				 content,
+				 valid: content.length <= 280
 			 };
 		 });
 	}
