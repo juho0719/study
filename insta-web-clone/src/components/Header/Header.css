@@ -20,8 +20,8 @@ i.Nav {
 .Nav-brand-logo {
   display: block;
   background-position: -176px 0px;
-  background-image: url(../../icons8-instagram-50.png);
-  background-size: 405px 379px;
+  /* background-image: url(../../icons8-instagram-50.png);
+  background-size: 405px 379px; */
   background-repeat: no-repeat;
   height: 35px;
   width: 176px;

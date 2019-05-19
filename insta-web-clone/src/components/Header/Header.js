@@ -1,18 +1,12 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCoffee } from '@fortawesome/free-solid-svg-icons'
 import "./Header.css";
 
 class Header extends React.Component {
 	render() {
 		return (
-			<nav className="Nav">
-				<div className="Nav-menus">
-					<div className="Nav-brand">
-						<a className="Nav-brand-logo" href="/">
-							Instagram
-						</a>
-					</div>
-				</div>
-			</nav>			
+			<FontAwesomeIcon icon={['fab', 'apple']} />
 		);
 	}
 }
