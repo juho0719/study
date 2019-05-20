@@ -6,7 +6,7 @@ import "./Header.css";
 class Header extends React.Component {
 	render() {
 		return (
-			<FontAwesomeIcon icon={faInstagram} />
+			<FontAwesomeIcon icon={faInstagram} size="2x" />
 		);
 	}
 }
