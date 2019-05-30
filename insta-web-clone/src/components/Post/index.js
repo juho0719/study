@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import profile from '../../img/profile.png';
+import family from '../../img/family.jpeg';
 
 const Article = styled.article`
 	border-radius: 3px;
@@ -55,11 +57,11 @@ class Post extends Component {
 
 	render() {
 		return (
-			<Article>
+			<Article ref="Post">
 				<header>
 					<PostUser>
 						<PostUserAvatar>
-							<PostUserAvatarImg src="https://www.laravelnigeria.com/img/chris.jpg" alt="Chris" />
+							<PostUserAvatarImg src={profile} alt="Kim" />
 						</PostUserAvatar>
 						<PostUserNickname>
 							<span>Chris</span>
@@ -68,7 +70,7 @@ class Post extends Component {
 				</header>
 				<div className="Post-image">
 					<PostImageBg>
-						<PostImageImg alt="Icon Living" src="https://pbs.twimg.com/media/DOXI0IEXkAAkokm.jpg" />
+						<PostImageImg alt="my family" src={family} />
 					</PostImageBg>
 				</div>
 				<PostCaption>
