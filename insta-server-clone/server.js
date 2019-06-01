@@ -24,9 +24,9 @@ let schema = buildSchema(`
 
 let userslist = {
 	a: {
-		id: "a",
+		id: "kjh0719",
 		nickname: "Kim",
-		avatar: ""
+		avatar: "http://localhost:4000/img/profile.png"
 	}
 };
 
@@ -34,20 +34,51 @@ let postslist = {
 	a: {
 		a: {
 			id: "a",
-			user: userslist["Kim"],
-			caption: "React Book",
-			image: ""
+			user: userslist["a"],
+			caption: "My family",
+			image: "http://localhost:4000/img/family.jpeg"
 		},
 		b: {
 			id: "b",
-			user: userslist["Lee"],
+			user: userslist["a"],
 			caption: "Vue Book",
 			image: ""
 		},
 		c: {
 			id: "c",
-			user: userslist["Park"],
+			user: userslist["a"],
 			caption: "Angular Book"
+		},
+		d: {
+			id: "d",
+			user: userslist["a"],
+			caption: "Pure Javascript"
 		}
 	}
-}
+};
+
+let root = {
+	user: function ({ id }) {
+		return userslist[id];
+	},
+	post: function ({ user_id, post_id }) {
+		return postslist[user_id][post_id];
+	},
+	posts: function ({ user_id }) {
+		return Object.values(postslist[user_id]);
+	}
+};
+
+let app = express();
+app.use(cors());
+app.use(
+	"/graphql",
+	graphqlHTTP({
+		schema: schema,
+		rootValue: root,
+		graphiql: true
+	})
+);
+app.use('/img', express.static('img'));
+// set application port
+app.listen(4000);

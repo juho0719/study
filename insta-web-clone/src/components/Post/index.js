@@ -1,25 +1,31 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import profile from '../../img/profile.png';
-import family from '../../img/family.jpeg';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
 
 const Article = styled.article`
 	border-radius: 3px;
 	border: 1px solid #e6e6e6;
 	background-color: #fff;
+	margin-top: 77px;
 	margin-bottom: 60px;
 	margin-left: 20%;
 	margin-right: 20%;
 `;
 
+const PostHeader = styled.header`
+	height: 40px;
+	vertical-align: center;
+`;
+
 const PostUser = styled.div`
 	display: flex;
-	padding: 16px;
+	padding: 5px;
 	align-items: center;
 `;
 
 const PostUserAvatar = styled.div`
-	width: 30px;
+	width: 35px;
 	height: 30px;
 `;
 
@@ -53,31 +59,53 @@ const PostCaptionStrong = styled.strong`
 	font-weight: bold;
 `;
 
-class Post extends Component {
+const Post = () => {
+	return (
+		<Query
+			query={gql`
+				{
+					post(user_id: "a", post_id: "a") {
+						image
+						caption
+						user {
+							nickname
+							avatar
+						}
+					}
+				}
+			`}
+		>
+			{({ loading, error, data }) => {
+				if (loading) return <p>Loading Post...</p>;
+				if (error) return <p>Error loading Post:(</p>;
+				let image = data.post.image;
+				let caption = data.post.caption;
+				let user = data.post.user;
 
-	render() {
-		return (
-			<Article ref="Post">
-				<header>
-					<PostUser>
-						<PostUserAvatar>
-							<PostUserAvatarImg src={profile} alt="Kim" />
-						</PostUserAvatar>
-						<PostUserNickname>
-							<span>Chris</span>
-						</PostUserNickname>
-					</PostUser>
-				</header>
-				<div className="Post-image">
-					<PostImageBg>
-						<PostImageImg alt="my family" src={family} />
-					</PostImageBg>
-				</div>
-				<PostCaption>
-					<PostCaptionStrong>Chris</PostCaptionStrong> Moving the community
-				</PostCaption>
-			</Article>
-		);
-	}
-}
+				return (
+					<Article ref="Post">
+						<PostHeader>
+							<PostUser>
+								<PostUserAvatar>
+									<PostUserAvatarImg src={user.avatar} alt={user.nickname} />
+								</PostUserAvatar>
+								<PostUserNickname>
+									<span>{user.nickname}</span>
+								</PostUserNickname>
+							</PostUser>
+						</PostHeader>
+						<div className="Post-image">
+							<PostImageBg>
+								<PostImageImg alt={caption} src={image} />
+							</PostImageBg>
+						</div>
+						<PostCaption>
+							<PostCaptionStrong>{user.nickname}</PostCaptionStrong> {caption}
+						</PostCaption>
+					</Article>
+				);
+			}}
+		</Query>
+	);
+};
 export default Post;

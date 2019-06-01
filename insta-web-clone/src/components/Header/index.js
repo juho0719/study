@@ -42,7 +42,7 @@ class Header extends React.Component {
 					<div className="nav-brand">
 						<InstaBrandLogo href="/">Instagram</InstaBrandLogo>
 					</div>
-				</NavMenus> 
+				</NavMenus>
 			</Nav>
 		);
 	}
