@@ -1,7 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Query } from 'react-apollo';
-import gql from 'graphql-tag';
 
 const Article = styled.article`
 	border-radius: 3px;
@@ -59,53 +57,34 @@ const PostCaptionStrong = styled.strong`
 	font-weight: bold;
 `;
 
-const Post = () => {
-	return (
-		<Query
-			query={gql`
-				{
-					post(user_id: "a", post_id: "a") {
-						image
-						caption
-						user {
-							nickname
-							avatar
-						}
-					}
-				}
-			`}
-		>
-			{({ loading, error, data }) => {
-				if (loading) return <p>Loading Post...</p>;
-				if (error) return <p>Error loading Post:(</p>;
-				let image = data.post.image;
-				let caption = data.post.caption;
-				let user = data.post.user;
-
-				return (
-					<Article ref="Post">
-						<PostHeader>
-							<PostUser>
-								<PostUserAvatar>
-									<PostUserAvatarImg src={user.avatar} alt={user.nickname} />
-								</PostUserAvatar>
-								<PostUserNickname>
-									<span>{user.nickname}</span>
-								</PostUserNickname>
-							</PostUser>
-						</PostHeader>
-						<div className="Post-image">
-							<PostImageBg>
-								<PostImageImg alt={caption} src={image} />
-							</PostImageBg>
-						</div>
-						<PostCaption>
-							<PostCaptionStrong>{user.nickname}</PostCaptionStrong> {caption}
-						</PostCaption>
-					</Article>
-				);
-			}}
-		</Query>
-	);
-};
+class Post extends React.Component {
+	render() {
+		const nickname = this.props.nickname;
+		const avatar = this.props.avatar;
+		const image = this.props.image;
+		const caption = this.props.caption;
+		return (
+			<Article ref="Post">
+				<PostHeader>
+					<PostUser>
+						<PostUserAvatar>
+							<PostUserAvatarImg src={avatar} alt={nickname} />
+						</PostUserAvatar>
+						<PostUserNickname>
+							<span>{nickname}</span>
+						</PostUserNickname>
+					</PostUser>
+				</PostHeader>
+				<div className="Post-image">
+					<PostImageBg>
+						<PostImageImg alt={caption} src={image} />
+					</PostImageBg>
+				</div>
+				<PostCaption>
+					<PostCaptionStrong>{nickname}</PostCaptionStrong> {caption}
+				</PostCaption>
+			</Article>
+		);
+	}
+}
 export default Post;
