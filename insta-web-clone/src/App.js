@@ -13,8 +13,8 @@ class App extends React.Component {
   constructor() {
     super();
     // connect to pusher
-    this.pusher = new Pusher("PUSHER_APP_KEY", {
-      cluster: 'eu',
+    this.pusher = new Pusher("561b437138b0fb79238c", {
+      cluster: 'ap3',
       encrypted: true
     });
   }

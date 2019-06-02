@@ -7,10 +7,10 @@ let bodyParser = require("body-parser");
 let Multipart = require("connect-multiparty");
 
 let pusher = new Pusher({
-	appId: 'PUSHER_APP_ID',
-	key: 'PUSHER_APP_KEY',
-	secret: 'PUSHER_APP_SECRET',
-	cluster: 'PUSHER_CLUSTER',
+	appId: '795383',
+	key: '561b437138b0fb79238c',
+	secret: 'ccf5553a5d7d9f08bf0c',
+	cluster: 'ap3',
 	encrypted: true
 });
 
