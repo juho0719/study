@@ -11,6 +11,9 @@ class Posts extends React.Component {
 	}
 
 	componentDidMount() {
+		//request permission
+		Notification.requestPermission();
+
 		//fetch the inital posts
 		this.props.apollo_client
 			.query({
@@ -35,14 +38,37 @@ class Posts extends React.Component {
 
 		// listen for a new post
 		this.posts_channel.bind("new-post", data => {
+			//update state
 			this.setState({ posts: this.state.posts.concat(data.post) });
+
+			//check if notifications are permitted
+			if (Notification.permission === 'granted') {
+				try {
+					//notify user of new Post
+					new Notification('Pusher Instagram Clone', { body: `New post from ${data.post.user.nickname}` });
+				} catch (e) {
+					console.log('Error displaying notification')
+				}
+			}
 		}, this);
 	}
 
 	render() {
 		return (
 			<div>
-				{this.state.posts.map(post => <Post nickname={post.user.nickname} avatar={post.user.avatar} image={post.image} caption={post.caption} key={post.id} />)}
+				{this.state.posts
+					.slice(0)
+					.reverse()
+					.map(post => (
+						<Post
+							nickname={post.user.nickname}
+							avatar={post.user.avatar}
+							image={post.image}
+							caption={post.caption}
+							key={post.id}
+						/>
+					))
+				}
 			</div>
 		);
 	}
