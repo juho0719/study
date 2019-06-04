@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import sprite from '../../img/sprite.png';
+import searchImg from '../../img/ic_search_48px-128.png';
 
 const Nav = styled.nav`
 	background-color: #fff;
@@ -34,6 +35,17 @@ const InstaBrandLogo = styled.a`
 	text-indent: -1000%
 `;
 
+const SearchBox = styled.div`
+	width: 200px;
+	padding-left: 80px;
+	box-sizing: border-box;
+
+	background: url(${searchImg});
+	background-size: 16px;
+	background-repeat: no-repeat;
+	background-position: 62px 0;
+`;
+
 class Header extends React.Component {
 	render() {
 		return (
@@ -42,7 +54,8 @@ class Header extends React.Component {
 					<div className="nav-brand">
 						<InstaBrandLogo href="/">Instagram</InstaBrandLogo>
 					</div>
-				</NavMenus>
+					<SearchBox type="text" placeholder="Search" />
+				</NavMenus> 
 			</Nav>
 		);
 	}
