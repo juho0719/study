@@ -13,7 +13,6 @@ class Posts extends React.Component {
 	componentDidMount() {
 		//request permission
 		Notification.requestPermission();
-
 		//fetch the inital posts
 		this.props.apollo_client
 			.query({
