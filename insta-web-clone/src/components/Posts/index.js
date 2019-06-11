@@ -52,6 +52,7 @@ class Posts extends React.Component {
 		}, this);
 	}
 
+
 	render() {
 		return (
 			<div>
