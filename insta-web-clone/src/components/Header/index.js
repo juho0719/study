@@ -55,10 +55,11 @@ class Header extends React.Component {
 						<InstaBrandLogo href="/">Instagram</InstaBrandLogo>
 					</div>
 					<SearchBox type="text" placeholder="Search" />
-				</NavMenus> 
+				</NavMenus>
 			</Nav>
 		);
 	}
 }
+
 
 export default Header;
