@@ -13,4 +13,19 @@ public class PostController {
     public ResponseEntity getPosts() {
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/regist")
+    public ResponseEntity regist() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/delete")
+    public ResponseEntity delete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/update")
+    public ResponseEntity update() {
+        return ResponseEntity.ok().build();
+    }
 }
