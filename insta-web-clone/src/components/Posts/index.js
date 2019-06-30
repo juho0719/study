@@ -10,6 +10,7 @@ class Posts extends React.Component {
 		}
 	}
 
+
 	componentDidMount() {
 		//request permission
 		Notification.requestPermission();
