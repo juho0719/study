@@ -20,4 +20,8 @@ public class Comment {
     @NotNull
     @Column
     String content;
+
+    @NotNull
+    @Column
+    String post_id;
 }
