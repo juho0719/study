@@ -21,7 +21,6 @@ public class Comment {
     @Column
     String content;
 
-    @NotNull
-    @Column
-    String post_id;
+    @ManyToOne
+    Post post;
 }

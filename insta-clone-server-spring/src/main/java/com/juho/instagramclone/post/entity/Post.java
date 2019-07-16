@@ -2,6 +2,7 @@ package com.juho.instagramclone.post.entity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,6 +27,6 @@ public class Post {
     @Column
     String images;
 
-    @OneToMany
-    List<Comment> comments;
+    @OneToMany(mappedBy = "post")
+    List<Comment> comments = new ArrayList<>();
 }
