@@ -18,4 +18,8 @@ public class PostService {
     public List<Post> getPosts(String userId) {
         return postDao.findByWriter(userId);
     }
+
+    public void storePost(Post param) {
+        postDao.save(param);
+    }
 }
