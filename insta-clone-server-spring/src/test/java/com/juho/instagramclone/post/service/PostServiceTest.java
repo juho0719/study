@@ -1,6 +1,7 @@
 package com.juho.instagramclone.post.service;
 
 import com.juho.instagramclone.post.dao.PostDao;
+import com.juho.instagramclone.post.entity.Comment;
 import com.juho.instagramclone.post.entity.Post;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -26,23 +27,36 @@ public class PostServiceTest {
 //    @TestConfiguration
 //    static class PostServiceTestContextConfiguration {
 //    }
+    @MockBean
+    PostDao postDao;
 
     @Before
     public void setUp() {
-        List<Post> list = new ArrayList<>();
         Post post = new Post();
         post.setWriter("Juho Kim");
         post.setContent("post example");
+
+        List<Comment> comments = new ArrayList<>();
+        Comment comment1 = new Comment();
+        comment1.setWriter("guest1");
+        comment1.setContent("comment1");
+        comment1.setPost(post);
+        comments.add(comment1);
+
+        Comment comment2 = new Comment();
+        comment2.setWriter("guest2");
+        comment2.setContent("comment2");
+        comment2.setPost(post);
+        comments.add(comment2);
+
+        post.setComments(comments);
+
+        List<Post> list = new ArrayList<>();
         list.add(post);
 
         Mockito.when(postDao.findByWriter(post.getWriter()))
                 .thenReturn(list);
-        Mockito.when(postDao.save(post))
-                .thenReturn(post);
     }
-
-    @MockBean
-    PostDao postDao;
 
     @Test
     public void getPosts() {
@@ -51,25 +65,9 @@ public class PostServiceTest {
 
         assertThat(post.getWriter()).isEqualTo("Juho Kim");
         assertThat(post.getContent()).isEqualTo("post example");
-    }
-
-    @Test
-    public void storePost() {
-
-        Post post = new Post();
-        post.setWriter("Juho Kim");
-        post.setContent("good job!");
-
-        Post returnPost = postDao.save(post);
-        log.info("##########################");
-        log.info("##########################");
-        log.info("##########################");
-        log.info("##########################");
-        log.info("##########################");
-        log.info("##########################");
-        log.info("{}", returnPost);
-
-        assertThat(returnPost.getWriter()).isEqualTo("Jesica Oh");
-        assertThat(returnPost.getContent()).isEqualTo("good job!");
+        assertThat(post.getComments().get(0).getWriter()).isEqualTo("guest1");
+        assertThat(post.getComments().get(0).getContent()).isEqualTo("comment1");
+        assertThat(post.getComments().get(1).getWriter()).isEqualTo("guest2");
+        assertThat(post.getComments().get(1).getContent()).isEqualTo("comment2");
     }
 }
