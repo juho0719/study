@@ -22,4 +22,8 @@ public class PostService {
     public void storePost(Post param) {
         postDao.save(param);
     }
+
+    public void delete(Post param) {
+        postDao.delete(param);
+    }
 }

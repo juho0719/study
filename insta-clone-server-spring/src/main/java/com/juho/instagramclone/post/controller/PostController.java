@@ -36,12 +36,15 @@ public class PostController {
     }
 
     @GetMapping("/delete")
-    public ResponseEntity delete() {
+    public ResponseEntity delete(@RequestBody Post param) {
+        postService.delete(param);
+
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/update")
-    public ResponseEntity update() {
+    public ResponseEntity update(@RequestBody Post param) {
+        postService.storePost(param);
         return ResponseEntity.ok().build();
     }
 }
