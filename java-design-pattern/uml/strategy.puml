@@ -1,3 +1,16 @@
 @startuml
-Object <|-- ArrayList
+class Client
+class Context
+interface Interface
+class ImplementationOne
+class ImplementationTwo
+
+Client --> Context
+Context o--> Interface : strategy
+ImplementationOne --|> Interface
+ImplementationTwo --|> Interface
+
+Interface : +algorithm()
+ImplementationOne : +algorithm()
+ImplementationTwo : +algorithm()
 @enduml
