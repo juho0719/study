@@ -6,6 +6,9 @@ import static org.hamcrest.number.IsCloseTo.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class AssertTest {
@@ -70,5 +73,15 @@ public class AssertTest {
 		thrown.expectMessage("balance only 0");
 
 		account.withdraw(100);
+	}
+
+	// 예외 무시
+	@Test
+	public void readsFromTestFile() throws IOException {
+		String filename = "test.txt";
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+		writer.write("test");
+		writer.close();
+		// ...
 	}
 }
