@@ -253,3 +253,236 @@ public class StatCompilerTest {
 - 세 메서드를 조합하여 흥미로운 테스트를 작성
 - 더 많은 로직을 커버하는 소수의 빠른 테스트는 DB호출에 의존하는 단일 테스트보다 수월하게 실행
 - 하지만 여전히 컨트롤러에 의존하는 `questionText()` 메서드를 테스트하고 싶음
+
+## F[I]RST: 고립시킨다
+- 좋은 단위 테스트는 적은 양의 코드를 검증하는 데 집중
+- 데이터 의존성 최소화 (데이터 의존성은 많은 문제를 야기 - 외부 요인에 의해 테스트가 깨질 가능성 농후)
+- 다른 단위 테스트에 의존하지 않아야 함
+- 테스트 코드는 어떤 순서나 시간에 관계없이 실행할 수 있어야 함
+- SRP(Single Responsibility Principle)는 테스트 메서드에 훌륭한 지침임
+
+## FI[R]ST: 좋은 테스트는 반복 가능해야 한다.
+- 실행 결과가 항상 같아야 함
+- 따라서 반복 가능한 테스트를 만들려면 직접 통제할 수 없는 외부 환경에 있는 항목들과 분리 시켜야 함
+- 하지만 시간과 같이 외부 환경에 따라 달라지는 로직들을 테스트하려면 적절한 목 객체를 사용하여 테스트 해야 함
+	- 자바 8에서는 `java.time.Clock` 객체를 사용하여 고정된 시간을 반환할 수 있음
+	```java
+	@Test
+	public void questionAnswersDataAdded() {
+		Instant now = new Date().toInstant();
+		controller.setClock(Clock.fixed(now, ZoneId.of("Asia/Seoul")));
+		int id = controller.addBooleanQuestion("text");
+
+		Question question = controller.find(id);
+
+		assertThat(question.getCreateTimestamp(), equalTo(now));
+	}
+	```
+	```java
+	public class QuestionController {
+		private Clock clock = Clock.systemUTC();
+
+		public int addBooleanQuestion(String text) {
+			return persist(new BooleanQuestion(text));
+		}
+
+		void setClock(Clock clock) {
+			this.clock = clock;
+		}
+
+		private int persist(Persistable object) {
+			object.setCreateTimestamp(clock.instant());
+			executeInTransaction((em) -> em.persist(object));
+			return object.getId();
+		}
+	}
+	```
+	- `QuestionController` 클래스는 `Clock`객체의 출처는 신경쓰지 않고, 현재 인스턴스 객체로 동작
+
+## FIR[S]T : 스스로 검증 가능하다
+- 테스트는 `assert`를 통해 기대하는 결과 값을 작성해야 함
+- 테스트에 필요한 어떤 설정 단계든 자동화 해야 함
+
+## FIRS[T] : 적시에 사용한다
+- 언제라도 단위 테스트를 작성할 수 있어야 함
+- 단위 테스트는 좋은 습관
+- 단위 테스트를 많이 할수록 테스트 대상 코드가 줄어들고 그러면 단위 테스트 작성이 쉬워짐
+- 옛날 코드에 대한 테스트는 시간 낭비가 될 수도 있음. 코드에 큰 결함이 없고 당장 변경할 예정이 없다면 버그 유발 가능성이 높고, 자주 변경되는 부분에 시간을 투자
+
+
+# Right-BICEP: 무엇을 테스트할 것인가?
+- `Right-BICEP`는 무엇을 테스트할지에 대해 쉽게 선별하게 함
+  - `Right` : 결과가 올바른가?
+	- `B` : 경계 조건(boundary conditions)은 맞는가?
+	- `I` : 역 관계(inverse relationship)를 검사할 수 있는가?
+	- `C` : 다른 수단을 활용하여 교차 검사(cross-check) 할 수 있는가?
+	- `E` : 오류 조건(error conditions)을 강제로 일어나게 할 수 있는가?
+	- `P` : 성능 조건(performance characteristics)은 기준에 부합하는가?
+
+## [Right]-BICEP : 결과가 올바른가?
+- 테스트 코드는 기대한 결과를 산출하는지 검증할 수 있어야 함
+- 산술 평균 테스트는 `ScoreCollection` 클래스가 `5`와 `7`을 넣었을 때 평균으로 `6`을 반환하는 지 보여줌
+```java
+@Test
+	public void answersArithmeticMeanOfTwoNumbers() {
+		ScoreCollection collection = new ScoreCollection();
+		collection.add(() -> 5);
+		collection.add(() -> 7);
+
+		int actualResult = collection.arithmeticMean();
+
+		assertThat(actualResult, equalTo(6));
+	}
+```
+- 더 많은 숫자나 더 큰 수를 넣어 테스트를 강화할 수도 있지만 그러한 테스트는 `Happy Path` 테스트의 영역에 해당
+- 행복 경로 테스트는 중요한 질문에서 한가지 답변을 나타냄
+	- `나는 코드가 정상적으로 동작한다면, 그것을 알 수 있을까?`
+	- 어떤 작은 부분의 코드에 대해 `Happy Path` 테스트를 할 수 없다면 그 내용을 완전히 이해하지 못한 것
+	- 이럴 경우 잠시 추가 개발은 보류하는 것이 좋음
+- 단, 모든 질문에 대답할 수 있을 때까지 기다릴 필요는 없음
+- 최선의 판단을 하고 나중에 답변이 명확해졌을 때 개선하면 됨
+- 단위 테스트는 선택을 문서화함. 어떤 변경이 발생하면 적어도 현재까지 코드가 어떻게 동작했는지는 알게 됨
+
+## Right-[B]ICEP : 경계 조건은 맞는가?
+- 생각해야 하는 경계 조건은 다음과 같음
+	- 모호하고 일관성 없는 입력 값. 예를 들어 특수 문자가 포함된 파일 이름
+	- 잘못된 양식의 데이터. 예를 들어 최상위 도메인이 빠진 이메일 주소(fred@foobar.)
+	- 수치적 오버플로우를 일으키는 계산
+	- 비거나 빠진 값. 예를 들어 `0`, `0.0`, `""` 혹은 `null`
+	- 이성적인 기댓값을 훨씬 벗어나는 값. 예를 들어 150세의 나이
+	- 중복을 허용해서는 안 되는 목록에서 중복 값이 있는 경우
+	- 정렬이 안된 정렬 리스트 혹은 정렬된 리스트. 정렬 알고리즘에 이미 정렬된 입력 값을 넣는 경우나 정렬 알고리즘에 역순 데이터를 넣는 경우
+	- 시간 순이 맞지 않는 경우. 예를 들어 HTTP 서버가 OPTIONS 메서드의 결과를 POST 메서드보다 먼저 반환해야 하지만 그 후에 반환하는 경우
+- 1장의 `ScoreCollection` 클래스의 코드는 문제가 없어 보임
+```java
+public class ScoreCollection {
+	private List<Scoreable> scores = new ArrayList<>();
+
+	public void add(Scoreable scoreable) {
+		scores.add(scoreable);
+	}
+
+	public int arithmeticMean() {
+		int total = scores.stream().mapToInt(Scoreable::getScore).sum();
+		return total / scores.size();
+	}
+}
+```
+
+- 입력된 `Scoreable` 인스턴스는 `null`일 수 있음
+```java
+@Test(expected = IllegalArgumentException.class)
+public void throwsExceptionWhenAddingNull() {
+	collection.add(null);
+}
+```
+
+- `arithmeticMean()` 메서드에서는 `NullPointerException`이 발생함
+- 클라이언트에 유효하지 않은 값을 넣자마자 오류가 발생하도록 하는 것이 좋음. `add()`메서드에 보호절(guard clause)을 넣어 입력 범위를 분명하게 함
+```java
+public void add(Scoreable scoreable) {
+	if (scoreable == null)
+		throw new IllegalArgumentException();
+	scores.add(scoreable);
+}
+```
+
+- `ScoreCollection` 객체에 `Scoreable` 인스턴스가 없을 수도 있음
+```java
+@Test
+public void answersZeroWhenNoElementsAdded() {
+	assertThat(collection.arithmeticMean(), equalTo(0));
+}
+```
+
+- 코드는 `0으로 나누기 오류`인 `ArithmeticException`이 발생할 수도 있음
+- `arithmeticMean()` 메서드에 있는 보호절은 컬렉션이 비었을 때 0 값을 기대한다고 명시
+```java
+public int arithmeticMean() {
+	if (scores.size() == 0)
+		return 0;
+	int total = scores.stream().mapToInt(Scoreable::getScore).sum();
+	return total / scores.size();
+}
+```
+
+- 큰 정수 입력을 다룬다면 숫자들의 합이 `Integer.MAX_VALUE`를 초과할 수도 있음
+```java
+@Test
+public void dealsWithIntergerOverflow() {
+	collection.add(() -> Integer.MAX_VALUE);
+	collection.add(() -> 1);
+
+	assertThat(collection.arithmeticMean(), equalTo(1073741824));
+}
+```
+
+- 한가지 해결 방법은
+```java
+public int arithmeticMean() {
+	if (scores.size() == 0)
+		return 0;
+	int total = scores.stream().mapToLong(Scoreable::getScore).sum();
+	return (int)(total / scores.size());
+}
+```
+
+- 클래스 설계시 이러한 오버플로우를 고려할지 여부는 스스로 결정하는 것이지만 외부에 노출되는 API라면 나쁜 데이터에 대한 보호가 필요함
+- 보호절을 제거한다면 코드 주석으로 경고할 수 있음
+- 더 좋은 방법은 문서화하는 테스트를 추가하는 것
+```java
+@Test
+public void doesNotProperlyHandleIntegerOverflow() {
+	collection.add(() -> Integer.MAX_VALUE);
+	collection.add(() -> 1);
+
+	assertTrue(collection.arithmeticMean() < 0);
+}
+```
+
+- 대부분의 시스템에서 검사하지 않은 오버플로우 자체를 허용하고 싶지는 않을 것
+- 하지만 발생한다면 예외를 던지는 것이 좋음
+
+## 경계 조건에서는 CORRECT를 기억하라
+- CORRECT 약어는 잠재적은 경계 조건을 기억하는 데 도움을 줌
+- 각 항목에 대해 유사한 조건을 테스트하려는 메서드에 해당하며, 이 조건을 위반했을 때 어떤 일이 일어날 수 있는 지 고려
+  - [C]onformance(준수) : 값이 기대한 양식을 준수하고 있는가?
+	- [O]rdering(순서) : 값의 집합이 적절하게 정렬되거나 정렬되지 않았나?
+	- [R]ange(범위) : 이성적인 최소값과 최대값 안에 있는가?
+	- [R]eference(참조) : 코드 자체에서 통제할 수 없는 어떤 외부 참조를 포함하고 있는가?
+	- [E]xistence(존재) : 값이 존재하는 가?
+	- [C]ardinality(기수) : 정확히 충분한 값들이 있는가?
+	- [T]ime(절대적 혹은 상대적 시간) : 모든 것이 순서대로 일어나는가? 정확한 시간에?
+
+## Right-B[I]CEP : 역 관계를 검사할 수 있는가?
+- 때때로 논리적인 역 관계를 적용하여 행동을 검사할 수 있음
+- 뉴턴의 알고리즘을 활용하여 제곱근을 구해보자
+```java
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.number.IsCloseTo.*;
+import static java.lang.Math.abs;
+import org.junit.jupiter.api.Test;
+
+public class NewtonTest {
+	static class Newton {
+		private static final double TOLERANCE = 1E-16;
+
+		public static double squareRoot(double n) {
+			double approx = n;
+			while (abs(approx - n / approx) > TOLERANCE * approx) {
+				approx = (n / approx + approx) / 2.0;
+			}
+			return approx;
+		}
+	}
+
+	@Test
+	public void squareRoot() {
+		double result = Newton.squareRoot(250.0);
+		assertThat(result * result, closeTo(250.0, Newton.TOLERANCE));
+	}
+}
+```
+
+- 테스트에서는 250을 인자로 `Newton.squareRoot()`메서드를 호출하여 `result`변수에 저장
+- `assert`에서는 `result`값을 제공하여 원래의 250에 충분히 가까운지 검사
