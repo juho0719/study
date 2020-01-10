@@ -1,6 +1,8 @@
 package com.example.vscode.test.vscodetest;
 
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.jayway.jsonpath.Criteria;
 
@@ -48,5 +50,9 @@ public class Profile {
 
 	public int score() {
 		return score;
+	}
+
+	public List<Answer> find(Predicate<Answer> pred) {
+		return answers.values().stream().filter(pred).collect(Collectors.toList());
 	}
 }
